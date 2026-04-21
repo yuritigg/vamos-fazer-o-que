@@ -1,16 +1,18 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { RegionalEvent } from "@/types/event";
+import { AgeRating, RegionalEvent } from "@/types/event";
 
 type EventImageRow = { image_url: string; is_cover: boolean };
 type NamedUserRow = { full_name: string | null };
 type ReviewRow = { id: string; rating: number; comment: string | null; users: NamedUserRow[] | null };
 type CommentRow = { id: string; message: string; created_at: string; users: NamedUserRow[] | null };
+type OrganizerRow = { id: string; display_name: string | null };
 type EventRow = {
   id: string;
   slug: string;
   title: string;
   description: string;
   category: RegionalEvent["category"];
+  age_rating: string | null;
   event_date: string;
   start_time: string;
   city: string;
@@ -19,7 +21,7 @@ type EventRow = {
   latitude: number | null;
   longitude: number | null;
   status: RegionalEvent["status"];
-  organizers: { display_name: string | null }[] | null;
+  organizers: OrganizerRow[] | null;
   event_images: EventImageRow[] | null;
   reviews: ReviewRow[] | null;
   event_comments?: CommentRow[] | null;
@@ -41,8 +43,7 @@ function toRegionalEvent(row: EventRow): RegionalEvent {
   }));
   const averageRating =
     reviews.length > 0
-      ? reviews.reduce((acc: number, review: { rating: number }) => acc + review.rating, 0) /
-        reviews.length
+      ? reviews.reduce((acc: number, r: { rating: number }) => acc + r.rating, 0) / reviews.length
       : 0;
 
   return {
@@ -51,9 +52,12 @@ function toRegionalEvent(row: EventRow): RegionalEvent {
     title: row.title,
     description: row.description,
     category: row.category,
+    ageRating: (row.age_rating as AgeRating) ?? "Livre",
     date: row.event_date,
     startTime: row.start_time,
-    imageUrl: cover?.image_url ?? "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80",
+    imageUrl:
+      cover?.image_url ??
+      "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80",
     organizerName: row.organizers?.[0]?.display_name ?? "Organizador",
     location: {
       cidade: row.city,
@@ -69,24 +73,55 @@ function toRegionalEvent(row: EventRow): RegionalEvent {
   };
 }
 
-export async function getApprovedEventsFromDb() {
-  const supabase = await createServerSupabaseClient();
+const EVENT_SELECT = `
+  id, slug, title, description, category, age_rating, event_date, start_time,
+  city, state, address, latitude, longitude, status,
+  organizers (id, display_name),
+  event_images (image_url, is_cover),
+  reviews (id, rating, comment, users (full_name))
+`;
 
-  const { data, error } = await supabase
+interface SearchOptions {
+  category?: string;
+  q?: string;
+}
+
+export async function getApprovedEventsFromDb(options?: SearchOptions) {
+  const supabase = await createServerSupabaseClient();
+  const { category, q } = options ?? {};
+
+  let query = supabase
     .from("events")
-    .select(
-      `
-      id, slug, title, description, category, event_date, start_time, city, state, address, latitude, longitude, status,
-      organizers (display_name),
-      event_images (image_url, is_cover),
-      reviews (id, rating, comment, users (full_name))
-    `,
-    )
+    .select(EVENT_SELECT)
     .eq("status", "aprovado")
     .order("event_date", { ascending: true });
 
+  if (category && category !== "") {
+    query = query.eq("category", category);
+  }
+
+  if (q && q.trim()) {
+    const safe = q.trim().replace(/[%_\\]/g, "\\$&");
+
+    const { data: matchingOrgs } = await supabase
+      .from("organizers")
+      .select("id")
+      .ilike("display_name", `%${safe}%`);
+
+    const orgIds = ((matchingOrgs ?? []) as { id: string }[]).map((o) => o.id);
+
+    let orFilter = `title.ilike.%${safe}%,category.ilike.%${safe}%`;
+    if (orgIds.length > 0) {
+      orFilter += `,organizer_id.in.(${orgIds.join(",")})`;
+    }
+
+    query = query.or(orFilter);
+  }
+
+  const { data, error } = await query;
+
   if (error) {
-    console.error("Erro ao buscar eventos aprovados:", error.message);
+    console.error("Erro ao buscar eventos:", error.message);
     return [];
   }
 
@@ -100,8 +135,9 @@ export async function getEventBySlugFromDb(slug: string) {
     .from("events")
     .select(
       `
-      id, slug, title, description, category, event_date, start_time, city, state, address, latitude, longitude, status,
-      organizers (display_name),
+      id, slug, title, description, category, age_rating, event_date, start_time,
+      city, state, address, latitude, longitude, status,
+      organizers (id, display_name),
       event_images (image_url, is_cover),
       reviews (id, rating, comment, users (full_name)),
       event_comments (id, message, created_at, users (full_name))

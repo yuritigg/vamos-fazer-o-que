@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { ArrowRight, ShieldCheck } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { EventList } from "@/components/events/event-list";
+import { EventSearchFilters } from "@/components/events/event-search-filters";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { getApprovedEventsFromDb } from "@/lib/supabase/events";
@@ -9,6 +10,8 @@ import { cn } from "@/lib/utils";
 interface HomePageProps {
   searchParams?: {
     erro?: string;
+    q?: string;
+    categoria?: string;
   };
 }
 
@@ -19,13 +22,11 @@ function ErrorMessage({ code }: { code?: string }) {
     code === "acesso-negado"
       ? {
           title: "Acesso negado",
-          description:
-            "Você não tem permissão para acessar esta área. Apenas administradores podem abrir o painel.",
+          description: "Você não tem permissão para acessar esta área.",
         }
       : {
           title: "Área exclusiva para organizadores",
-          description:
-            "Para cadastrar eventos, sua conta precisa estar como organizador (ou administrador).",
+          description: "Para publicar eventos, sua conta precisa ser de organizador.",
         };
 
   return (
@@ -42,10 +43,16 @@ function ErrorMessage({ code }: { code?: string }) {
 }
 
 export default async function Home({ searchParams }: HomePageProps) {
-  const events = await getApprovedEventsFromDb();
+  const q = searchParams?.q ?? "";
+  const categoria = searchParams?.categoria ?? "";
+
+  const events = await getApprovedEventsFromDb({
+    category: categoria || undefined,
+    q: q || undefined,
+  });
 
   return (
-    <div className="container mx-auto space-y-12 px-4 py-10">
+    <div className="container mx-auto space-y-10 px-4 py-10">
       <ErrorMessage code={searchParams?.erro} />
 
       <section className="relative overflow-hidden rounded-3xl border border-slate-200/60 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 p-8 text-white shadow-2xl">
@@ -53,33 +60,30 @@ export default async function Home({ searchParams }: HomePageProps) {
         <div className="pointer-events-none absolute -bottom-20 left-20 h-48 w-48 rounded-full bg-indigo-500/25 blur-3xl" />
         <div className="max-w-2xl space-y-4">
           <p className="text-sm font-medium text-sky-300">Portal de eventos regionais</p>
-          <h1 className="text-4xl font-bold tracking-tight">Descubra tudo o que está rolando perto de você</h1>
+          <h1 className="text-4xl font-bold tracking-tight">
+            Descubra tudo o que está rolando perto de você
+          </h1>
           <p className="text-slate-200">
-            O Vamos Fazer O Que? conecta pessoas aos melhores eventos regionais e ajuda organizadores a divulgar experiências incríveis.
+            Conectamos pessoas aos melhores eventos da região e ajudamos organizadores a divulgar experiências incríveis.
           </p>
-          <div className="flex flex-wrap gap-3">
-            <Link
-              href="/cadastro-evento"
-              className={cn(buttonVariants(), "bg-sky-500 text-slate-950 hover:bg-sky-400")}
-            >
-              Publicar evento
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
-            <Link
-              href="/admin"
-              className={cn(
-                buttonVariants({ variant: "outline" }),
-                "border-slate-400/60 bg-transparent text-white hover:bg-slate-700/60",
-              )}
-            >
-              <ShieldCheck className="mr-2 h-4 w-4" />
-              Painel administrativo
-            </Link>
-          </div>
+          <Link
+            href="/cadastro-evento"
+            className={cn(buttonVariants(), "bg-sky-500 text-slate-950 hover:bg-sky-400")}
+          >
+            Publicar evento
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Link>
         </div>
       </section>
 
-      <EventList events={events} />
+      <section className="space-y-5">
+        <EventSearchFilters currentQ={q} currentCategoria={categoria} />
+        <p className="text-sm text-muted-foreground">
+          {events.length} evento(s) encontrado(s)
+          {q || categoria ? " para esta busca" : ""}
+        </p>
+        <EventList events={events} />
+      </section>
     </div>
   );
 }

@@ -7,6 +7,7 @@ export const mockEvents: RegionalEvent[] = [
     title: "Festa Junina de Campina",
     description: "Quadrilhas, comidas típicas e shows regionais no coração da cidade.",
     category: "Festa",
+    ageRating: "Livre",
     date: "2026-06-18",
     startTime: "19:00",
     imageUrl:
@@ -35,6 +36,7 @@ export const mockEvents: RegionalEvent[] = [
     title: "Circuito Regional de Corrida",
     description: "Percurso de 5km e 10km com premiação para categorias por idade.",
     category: "Esporte",
+    ageRating: "Livre",
     date: "2026-07-12",
     startTime: "06:00",
     imageUrl:
@@ -58,6 +60,7 @@ export const mockEvents: RegionalEvent[] = [
     title: "Feira Sabores do Sertão",
     description: "Produtores locais, oficinas gastronômicas e música ao vivo.",
     category: "Gastronomia",
+    ageRating: "Livre",
     date: "2026-05-28",
     startTime: "15:00",
     imageUrl:

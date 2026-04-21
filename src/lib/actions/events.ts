@@ -10,7 +10,7 @@ function slugify(value: string) {
   return value
     .toLowerCase()
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[̀-ͯ]/g, "")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)+/g, "");
 }
@@ -32,17 +32,27 @@ export async function createEventAction(_: ActionResult, formData: FormData): Pr
 
   const title = String(formData.get("title") ?? "").trim();
   const category = String(formData.get("category") ?? "").trim();
+  const ageRating = String(formData.get("ageRating") ?? "Livre").trim();
   const eventDate = String(formData.get("eventDate") ?? "");
   const startTime = String(formData.get("startTime") ?? "");
   const description = String(formData.get("description") ?? "").trim();
+
+  // Address fields
+  const street = String(formData.get("street") ?? "").trim();
+  const number = String(formData.get("number") ?? "").trim();
+  const complement = String(formData.get("complement") ?? "").trim();
+  const neighborhood = String(formData.get("neighborhood") ?? "").trim();
   const city = String(formData.get("city") ?? "").trim();
   const state = String(formData.get("state") ?? "").trim();
-  const address = String(formData.get("address") ?? "").trim();
   const latitude = Number(formData.get("latitude") ?? 0);
   const longitude = Number(formData.get("longitude") ?? 0);
+
+  const addressParts = [street, number, complement, neighborhood].filter(Boolean);
+  const address = addressParts.join(", ");
+
   const file = formData.get("image");
 
-  if (!title || !category || !eventDate || !startTime || !description || !city || !state || !address) {
+  if (!title || !category || !ageRating || !eventDate || !startTime || !description || !street || !number || !neighborhood || !city || !state) {
     return { ok: false, message: "Preencha todos os campos obrigatórios." };
   }
 
@@ -57,13 +67,14 @@ export async function createEventAction(_: ActionResult, formData: FormData): Pr
       slug: eventSlug,
       description,
       category,
+      age_rating: ageRating,
       event_date: eventDate,
       start_time: startTime,
       city,
       state,
       address,
-      latitude: Number.isFinite(latitude) ? latitude : null,
-      longitude: Number.isFinite(longitude) ? longitude : null,
+      latitude: Number.isFinite(latitude) && latitude !== 0 ? latitude : null,
+      longitude: Number.isFinite(longitude) && longitude !== 0 ? longitude : null,
       status: "pendente",
     })
     .select("id")
@@ -85,7 +96,7 @@ export async function createEventAction(_: ActionResult, formData: FormData): Pr
 
   revalidatePath("/");
   revalidatePath("/admin");
-  return { ok: true, message: "Evento cadastrado com sucesso e enviado para aprovação." };
+  return { ok: true, message: "Evento enviado com sucesso! Nossa equipe irá analisar em breve." };
 }
 
 export async function createReviewAction(_: ActionResult, formData: FormData): Promise<ActionResult> {
@@ -103,12 +114,7 @@ export async function createReviewAction(_: ActionResult, formData: FormData): P
 
   const supabase = await createServerSupabaseClient();
   const { error } = await supabase.from("reviews").upsert(
-    {
-      event_id: eventId,
-      user_id: user.id,
-      rating,
-      comment,
-    },
+    { event_id: eventId, user_id: user.id, rating, comment },
     { onConflict: "event_id,user_id" },
   );
 

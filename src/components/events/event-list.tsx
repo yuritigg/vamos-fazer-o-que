@@ -1,8 +1,4 @@
-"use client";
-
-import { useMemo, useState } from "react";
 import { EventCard } from "@/components/events/event-card";
-import { EventFilters } from "@/components/events/event-filters";
 import { RegionalEvent } from "@/types/event";
 
 interface EventListProps {
@@ -10,30 +6,20 @@ interface EventListProps {
 }
 
 export function EventList({ events }: EventListProps) {
-  const [selectedCategory, setSelectedCategory] = useState("todas");
-
-  const filteredEvents = useMemo(() => {
-    if (selectedCategory === "todas") return events;
-    return events.filter((event) => event.category === selectedCategory);
-  }, [events, selectedCategory]);
+  if (events.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <p className="text-lg font-medium text-muted-foreground">Nenhum evento encontrado</p>
+        <p className="mt-1 text-sm text-muted-foreground">Tente outros termos de busca ou remova os filtros</p>
+      </div>
+    );
+  }
 
   return (
-    <section className="space-y-6">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h2 className="text-2xl font-semibold">Eventos em destaque</h2>
-          <p className="text-sm text-muted-foreground">
-            {filteredEvents.length} evento(s) encontrado(s)
-          </p>
-        </div>
-        <EventFilters selectedCategory={selectedCategory} onCategoryChange={setSelectedCategory} />
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {filteredEvents.map((event) => (
-          <EventCard key={event.id} event={event} />
-        ))}
-      </div>
-    </section>
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {events.map((event) => (
+        <EventCard key={event.id} event={event} />
+      ))}
+    </div>
   );
 }

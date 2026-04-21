@@ -5,6 +5,7 @@
 -- 2) event_comments + RLS/policies
 -- 3) policy de INSERT em users
 -- 4) trigger/função com persistência de email em users
+-- 5) coluna age_rating em events
 
 -- 1) Nova coluna de email em users
 alter table public.users
@@ -127,3 +128,7 @@ begin
   end if;
 end
 $$;
+
+-- 6) Coluna faixa etária em events
+alter table public.events
+  add column if not exists age_rating text not null default 'Livre';

@@ -85,7 +85,11 @@ export async function moderateEventFromForm(_: ActionResult, formData: FormData)
     return { ok: false, message: "Dados inválidos para moderação." };
   }
 
-  const rejectionReason = String(formData.get("rejectionReason") ?? "");
+  const rejectionReason = String(formData.get("rejectionReason") ?? "").trim();
+
+  if (status === "reprovado" && !rejectionReason) {
+    return { ok: false, message: "Informe o motivo da reprovação." };
+  }
 
   const result = await moderateEvent({
     eventId,

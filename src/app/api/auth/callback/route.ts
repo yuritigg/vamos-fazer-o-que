@@ -16,20 +16,27 @@ export async function GET(request: Request) {
     } = await supabase.auth.getUser();
 
     if (user) {
-      await supabase
-        .from("users")
-        .upsert({
-          id: user.id,
-          full_name: user.user_metadata.full_name ?? user.email ?? "Usuário",
-          email: user.email,
-          role,
-        });
+      await supabase.from("users").upsert({
+        id: user.id,
+        full_name: user.user_metadata.full_name ?? user.email ?? "Usuário",
+        email: user.email,
+        role,
+      });
 
       if (role === "organizador") {
-        await supabase.from("organizers").upsert({
-          user_id: user.id,
-          display_name: user.user_metadata.full_name ?? user.email ?? "Organizador",
-        });
+        await supabase.from("organizers").upsert(
+          {
+            user_id: user.id,
+            display_name:
+              user.user_metadata.display_name ??
+              user.user_metadata.full_name ??
+              user.email ??
+              "Organizador",
+            document: user.user_metadata.document ?? null,
+            phone: user.user_metadata.phone ?? null,
+          },
+          { onConflict: "user_id" },
+        );
       }
     }
   }

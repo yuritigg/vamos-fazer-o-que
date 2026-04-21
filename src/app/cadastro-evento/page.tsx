@@ -19,14 +19,14 @@ export default async function EventRegistrationPage() {
       <div>
         <h1 className="text-3xl font-bold">Cadastro de evento</h1>
         <p className="text-muted-foreground">
-          Formulário base para organizadores. A imagem será enviada ao Cloudinary e o evento ficará pendente para aprovação.
+          Preencha os dados do seu evento. Após análise da nossa equipe, ele será publicado na plataforma.
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Novo evento regional</CardTitle>
-          <CardDescription>Preencha os dados para enviar para análise da equipe administrativa.</CardDescription>
+          <CardTitle>Novo evento</CardTitle>
+          <CardDescription>Todos os campos marcados com * são obrigatórios.</CardDescription>
         </CardHeader>
         <CardContent>
           <EventRegistrationForm />

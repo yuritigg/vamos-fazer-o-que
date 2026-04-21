@@ -1,13 +1,26 @@
 export const EVENT_CATEGORIES = [
-  "Festa",
-  "Show",
-  "Gastronomia",
+  "Música",
   "Esporte",
-  "Cultural",
-  "Negócios",
+  "Gastronomia",
+  "Festa",
+  "Natureza",
+  "Família",
+  "Teatro e Dança",
+  "Educação",
 ] as const;
 
 export type EventCategory = (typeof EVENT_CATEGORIES)[number];
+
+export const AGE_RATINGS = [
+  "Livre",
+  "10 anos ou mais",
+  "12 anos ou mais",
+  "14 anos ou mais",
+  "16 anos ou mais",
+  "18 anos ou mais",
+] as const;
+
+export type AgeRating = (typeof AGE_RATINGS)[number];
 
 export type EventStatus = "pendente" | "aprovado" | "reprovado";
 
@@ -45,6 +58,7 @@ export interface RegionalEvent {
   organizerName: string;
   location: EventLocation;
   status: EventStatus;
+  ageRating: AgeRating;
   averageRating: number;
   reviews: EventReview[];
   comments: EventComment[];

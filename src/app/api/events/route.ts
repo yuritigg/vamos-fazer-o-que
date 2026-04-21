@@ -3,10 +3,10 @@ import { getApprovedEventsFromDb } from "@/lib/supabase/events";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const category = searchParams.get("category");
+  const category = searchParams.get("category") ?? undefined;
+  const q = searchParams.get("q") ?? undefined;
 
-  const events = await getApprovedEventsFromDb();
-  const filtered = category && category !== "todas" ? events.filter((event) => event.category === category) : events;
+  const events = await getApprovedEventsFromDb({ category, q });
 
-  return NextResponse.json({ data: filtered });
+  return NextResponse.json({ data: events });
 }
