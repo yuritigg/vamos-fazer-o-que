@@ -99,6 +99,10 @@ export async function createEventAction(_: ActionResult, formData: FormData): Pr
 
   if (file instanceof File && file.size > 0) {
     const imageUpload = await uploadFileToCloudinary(file);
+    await supabase
+      .from("events")
+      .update({ cover_image_url: imageUpload.secure_url })
+      .eq("id", createdEvent.id);
     await supabase.from("event_images").insert({
       event_id: createdEvent.id,
       image_url: imageUpload.secure_url,
@@ -109,7 +113,7 @@ export async function createEventAction(_: ActionResult, formData: FormData): Pr
 
   revalidatePath("/");
   revalidatePath("/admin");
-  return { ok: true, message: "Evento enviado com sucesso! Nossa equipe irá analisar em breve." };
+  return { ok: true, message: "Evento enviado para aprovação! Nossa equipe irá analisar as informações e você será notificado em breve." };
 }
 
 export async function createReviewAction(_: ActionResult, formData: FormData): Promise<ActionResult> {

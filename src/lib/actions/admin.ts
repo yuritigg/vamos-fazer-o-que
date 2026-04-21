@@ -77,6 +77,25 @@ export async function moderateEvent({
   return { success: true };
 }
 
+export async function deleteEventAction(_: ActionResult, formData: FormData): Promise<ActionResult> {
+  const { user, profile } = await getCurrentUserProfile();
+  if (!user || !profile || (!profile.is_admin && profile.role !== "admin")) {
+    return { ok: false, message: "Apenas administradores podem excluir eventos." };
+  }
+
+  const eventId = String(formData.get("eventId") ?? "");
+  if (!eventId) return { ok: false, message: "ID do evento inválido." };
+
+  const supabase = await createServerSupabaseClient();
+  const { error } = await supabase.from("events").delete().eq("id", eventId);
+
+  if (error) return { ok: false, message: error.message };
+
+  revalidatePath("/admin");
+  revalidatePath("/");
+  return { ok: true, message: "Evento excluído com sucesso." };
+}
+
 export async function moderateEventFromForm(_: ActionResult, formData: FormData): Promise<ActionResult> {
   const eventId = String(formData.get("eventId") ?? "");
   const status = String(formData.get("status") ?? "") as "aprovado" | "reprovado";

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useFormState } from "react-dom";
+import { useRouter } from "next/navigation";
 import { createEventAction } from "@/lib/actions/events";
 import { INITIAL_ACTION_RESULT } from "@/types/actions";
 import { SubmitButton } from "@/components/forms/submit-button";
@@ -12,6 +13,13 @@ import { AGE_RATINGS, EVENT_CATEGORIES } from "@/types/event";
 
 export function EventRegistrationForm() {
   const [state, action] = useFormState(createEventAction, INITIAL_ACTION_RESULT);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (state.ok) {
+      router.push("/?sucesso=evento-enviado");
+    }
+  }, [state.ok, router]);
 
   const [cep, setCep] = useState("");
   const [street, setStreet] = useState("");
@@ -253,10 +261,8 @@ export function EventRegistrationForm() {
 
       <SubmitButton pendingText="Enviando evento...">Enviar para aprovação</SubmitButton>
 
-      {state.message ? (
-        <p className={`text-sm ${state.ok ? "text-emerald-600" : "text-destructive"}`}>
-          {state.message}
-        </p>
+      {state.message && !state.ok ? (
+        <p className="text-sm text-destructive">{state.message}</p>
       ) : null}
     </form>
   );

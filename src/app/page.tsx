@@ -12,6 +12,7 @@ interface HomePageProps {
     erro?: string;
     q?: string;
     categoria?: string;
+    sucesso?: string;
   };
 }
 
@@ -54,6 +55,17 @@ export default async function Home({ searchParams }: HomePageProps) {
   return (
     <div className="container mx-auto space-y-10 px-4 py-10">
       <ErrorMessage code={searchParams?.erro} />
+
+      {searchParams?.sucesso === "evento-enviado" && (
+        <Card className="border-emerald-500/40 bg-emerald-500/5">
+          <CardContent className="p-4">
+            <p className="font-semibold text-emerald-700">Evento enviado para aprovação!</p>
+            <p className="text-sm text-muted-foreground">
+              Nossa equipe irá analisar as informações e você será notificado em breve.
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       <section className="relative overflow-hidden rounded-3xl border border-slate-200/60 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 p-8 text-white shadow-2xl">
         <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-sky-400/25 blur-3xl" />

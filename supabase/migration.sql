@@ -133,6 +133,10 @@ $$;
 alter table public.events
   add column if not exists age_rating text not null default 'Livre';
 
+-- 8) Coluna cover_image_url em events (URL direta da imagem de capa, sem depender de RLS em event_images)
+alter table public.events
+  add column if not exists cover_image_url text;
+
 -- 7) Fix: stack depth limit exceeded — SECURITY DEFINER nas funções is_admin e is_organizer_of_event
 -- Sem SECURITY DEFINER, essas funções são inlineadas pelo PostgreSQL e executam com as
 -- permissões do usuário chamador. is_admin() lê public.users, que tem RLS usando is_admin(),
