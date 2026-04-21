@@ -21,11 +21,24 @@ export async function createEventAction(_: ActionResult, formData: FormData): Pr
     return { ok: false, message: "Faça login para cadastrar um evento." };
   }
 
-  if (profile.role !== "organizador" && !profile.is_admin) {
+  const isAdmin = profile.is_admin || profile.role === "admin";
+
+  if (profile.role !== "organizador" && !isAdmin) {
     return { ok: false, message: "Somente organizadores podem cadastrar eventos." };
   }
 
-  const organizer = await getOrganizerByUserId(user.id);
+  let organizer = await getOrganizerByUserId(user.id);
+
+  if (!organizer && isAdmin) {
+    const supa = await createServerSupabaseClient();
+    const { data } = await supa
+      .from("organizers")
+      .insert({ user_id: user.id, display_name: profile.full_name ?? "Administrador" })
+      .select("id, display_name")
+      .single();
+    organizer = data;
+  }
+
   if (!organizer) {
     return { ok: false, message: "Seu perfil ainda não possui cadastro de organizador." };
   }

@@ -7,6 +7,11 @@ import { LogoutButton } from "@/components/layout/logout-button";
 
 export async function SiteHeader() {
   const { user, profile } = await getCurrentUserProfile();
+  const canPublish = Boolean(
+    profile?.role === "organizador" ||
+    profile?.role === "admin" ||
+    profile?.is_admin,
+  );
 
   return (
     <header className="sticky top-0 z-40 border-b border-white/10 bg-slate-950/95 text-slate-100 shadow-lg backdrop-blur">
@@ -20,7 +25,7 @@ export async function SiteHeader() {
           <Link href="/" className="text-sm text-slate-300 transition-colors hover:text-white">
             Início
           </Link>
-          {user && (
+          {canPublish && (
             <Link href="/cadastro-evento" className="text-sm text-slate-300 transition-colors hover:text-white">
               Publicar evento
             </Link>
