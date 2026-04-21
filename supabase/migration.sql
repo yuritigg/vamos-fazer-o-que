@@ -132,3 +132,38 @@ $$;
 -- 6) Coluna faixa etária em events
 alter table public.events
   add column if not exists age_rating text not null default 'Livre';
+
+-- 7) Fix: stack depth limit exceeded — SECURITY DEFINER nas funções is_admin e is_organizer_of_event
+-- Sem SECURITY DEFINER, essas funções são inlineadas pelo PostgreSQL e executam com as
+-- permissões do usuário chamador. is_admin() lê public.users, que tem RLS usando is_admin(),
+-- causando recursão infinita. SECURITY DEFINER faz a função bypassar RLS internamente.
+create or replace function public.is_admin()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.users u
+    where u.id = auth.uid()
+      and (u.is_admin = true or u.role = 'admin')
+  );
+$$;
+
+create or replace function public.is_organizer_of_event(event_uuid uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.events e
+    join public.organizers o on o.id = e.organizer_id
+    where e.id = event_uuid
+      and o.user_id = auth.uid()
+  );
+$$;
