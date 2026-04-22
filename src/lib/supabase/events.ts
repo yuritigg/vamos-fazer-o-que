@@ -13,7 +13,7 @@ type EventRow = {
   description: string;
   category: RegionalEvent["category"];
   age_rating: string | null;
-  cover_image_url: string | null;
+  cover_image_url?: string | null;
   event_date: string;
   start_time: string;
   city: string;
@@ -80,7 +80,7 @@ function toRegionalEvent(row: EventRow): RegionalEvent {
 }
 
 const EVENT_SELECT = `
-  id, slug, title, description, category, age_rating, cover_image_url, event_date, start_time,
+  id, slug, title, description, category, age_rating, event_date, start_time,
   city, state, address, latitude, longitude, status,
   organizers (id, display_name),
   event_images (image_url, is_cover),
@@ -141,7 +141,7 @@ export async function getEventBySlugFromDb(slug: string) {
     .from("events")
     .select(
       `
-      id, slug, title, description, category, age_rating, cover_image_url, event_date, start_time,
+      id, slug, title, description, category, age_rating, event_date, start_time,
       city, state, address, latitude, longitude, status,
       organizers (id, display_name),
       event_images (image_url, is_cover),
@@ -199,6 +199,7 @@ export type AdminEvent = {
   organizerName: string;
 };
 
+
 export async function getAdminEventsFromDb(): Promise<AdminEvent[]> {
   const supabase = await createServerSupabaseClient();
 
@@ -206,7 +207,7 @@ export async function getAdminEventsFromDb(): Promise<AdminEvent[]> {
     .from("events")
     .select(
       `
-      id, slug, title, description, category, age_rating, cover_image_url,
+      id, slug, title, description, category, age_rating,
       event_date, start_time, city, state, address, status, created_at,
       organizers (display_name, users (full_name))
     `,
@@ -220,7 +221,7 @@ export async function getAdminEventsFromDb(): Promise<AdminEvent[]> {
 
   return ((data ?? []) as unknown as Array<{
     id: string; slug: string; title: string; description: string; category: string;
-    age_rating: string | null; cover_image_url: string | null;
+    age_rating: string | null;
     event_date: string; start_time: string; city: string; state: string; address: string;
     status: "pendente" | "aprovado" | "reprovado"; created_at: string;
     organizers: Array<{ display_name: string | null; users: Array<{ full_name: string | null }> | null }> | null;
@@ -231,7 +232,7 @@ export async function getAdminEventsFromDb(): Promise<AdminEvent[]> {
     description: row.description,
     category: row.category,
     age_rating: row.age_rating,
-    cover_image_url: row.cover_image_url,
+    cover_image_url: null,
     event_date: row.event_date,
     start_time: row.start_time,
     city: row.city,
