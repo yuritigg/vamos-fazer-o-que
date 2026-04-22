@@ -171,3 +171,15 @@ as $$
       and o.user_id = auth.uid()
   );
 $$;
+
+-- 9) Política de DELETE em events — sem ela o Supabase ignora o DELETE silenciosamente
+drop policy if exists events_delete_admin on public.events;
+create policy events_delete_admin
+on public.events for delete
+using (
+  public.is_admin()
+  or exists (
+    select 1 from public.organizers o
+    where o.id = organizer_id and o.user_id = auth.uid()
+  )
+);

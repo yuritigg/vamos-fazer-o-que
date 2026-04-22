@@ -87,9 +87,16 @@ export async function deleteEventAction(_: ActionResult, formData: FormData): Pr
   if (!eventId) return { ok: false, message: "ID do evento inválido." };
 
   const supabase = await createServerSupabaseClient();
-  const { error } = await supabase.from("events").delete().eq("id", eventId);
+  const { data: deleted, error } = await supabase
+    .from("events")
+    .delete()
+    .eq("id", eventId)
+    .select("id");
 
   if (error) return { ok: false, message: error.message };
+  if (!deleted || deleted.length === 0) {
+    return { ok: false, message: "Não foi possível excluir. Verifique se a política de exclusão foi aplicada no banco de dados." };
+  }
 
   revalidatePath("/admin");
   revalidatePath("/");

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useFormState } from "react-dom";
 import { Trash2 } from "lucide-react";
 import { deleteEventAction } from "@/lib/actions/admin";
@@ -20,6 +20,12 @@ import { SubmitButton } from "@/components/forms/submit-button";
 export function DeleteEventButton({ eventId }: { eventId: string }) {
   const [open, setOpen] = useState(false);
   const [state, action] = useFormState(deleteEventAction, INITIAL_ACTION_RESULT);
+
+  useEffect(() => {
+    if (state.ok) {
+      setOpen(false);
+    }
+  }, [state.ok]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
