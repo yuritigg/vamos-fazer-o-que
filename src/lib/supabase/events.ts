@@ -126,13 +126,7 @@ export async function getApprovedEventsFromDb(options?: SearchOptions) {
     return [];
   }
 
-  console.log("[getApprovedEventsFromDb] raw data:", JSON.stringify(data, null, 2));
-
-  const mapped = ((data ?? []) as unknown as EventRow[]).map(toRegionalEvent);
-
-  console.log("[getApprovedEventsFromDb] mapped imageUrls:", mapped.map(e => ({ slug: e.slug, imageUrl: e.imageUrl })));
-
-  return mapped;
+  return ((data ?? []) as unknown as EventRow[]).map(toRegionalEvent);
 }
 
 export async function getEventBySlugFromDb(slug: string) {
