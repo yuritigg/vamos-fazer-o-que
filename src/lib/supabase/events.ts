@@ -209,7 +209,8 @@ export async function getAdminEventsFromDb(): Promise<AdminEvent[]> {
       `
       id, slug, title, description, category, age_rating,
       event_date, start_time, city, state, address, status, created_at,
-      organizers (display_name, users (full_name))
+      organizers (display_name, users (full_name)),
+      event_images (image_url, is_cover)
     `,
     )
     .order("created_at", { ascending: false });
@@ -225,24 +226,28 @@ export async function getAdminEventsFromDb(): Promise<AdminEvent[]> {
     event_date: string; start_time: string; city: string; state: string; address: string;
     status: "pendente" | "aprovado" | "reprovado"; created_at: string;
     organizers: Array<{ display_name: string | null; users: Array<{ full_name: string | null }> | null }> | null;
-  }>).map((row) => ({
-    id: row.id,
-    slug: row.slug,
-    title: row.title,
-    description: row.description,
-    category: row.category,
-    age_rating: row.age_rating,
-    cover_image_url: null,
-    event_date: row.event_date,
-    start_time: row.start_time,
-    city: row.city,
-    state: row.state,
-    address: row.address,
-    status: row.status,
-    created_at: row.created_at,
-    organizerName:
-      row.organizers?.[0]?.display_name ??
-      row.organizers?.[0]?.users?.[0]?.full_name ??
-      "Organizador",
-  }));
+    event_images: Array<{ image_url: string; is_cover: boolean }> | null;
+  }>).map((row) => {
+    const coverImage = row.event_images?.find((img) => img.is_cover) ?? row.event_images?.[0];
+    return {
+      id: row.id,
+      slug: row.slug,
+      title: row.title,
+      description: row.description,
+      category: row.category,
+      age_rating: row.age_rating,
+      cover_image_url: coverImage?.image_url ?? null,
+      event_date: row.event_date,
+      start_time: row.start_time,
+      city: row.city,
+      state: row.state,
+      address: row.address,
+      status: row.status,
+      created_at: row.created_at,
+      organizerName:
+        row.organizers?.[0]?.display_name ??
+        row.organizers?.[0]?.users?.[0]?.full_name ??
+        "Organizador",
+    };
+  });
 }

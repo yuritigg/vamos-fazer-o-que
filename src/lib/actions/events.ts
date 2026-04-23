@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { uploadFileToCloudinary } from "@/lib/cloudinary";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createAdminSupabaseClient, createServerSupabaseClient } from "@/lib/supabase/server";
 import { getCurrentUserProfile, getOrganizerByUserId } from "@/lib/supabase/authz";
 import { ActionResult } from "@/types/actions";
 
@@ -98,17 +98,26 @@ export async function createEventAction(_: ActionResult, formData: FormData): Pr
   }
 
   if (file instanceof File && file.size > 0) {
-    const imageUpload = await uploadFileToCloudinary(file);
-    await supabase
-      .from("events")
-      .update({ cover_image_url: imageUpload.secure_url })
-      .eq("id", createdEvent.id);
-    await supabase.from("event_images").insert({
-      event_id: createdEvent.id,
-      image_url: imageUpload.secure_url,
-      cloudinary_public_id: imageUpload.public_id,
-      is_cover: true,
-    });
+    try {
+      const imageUpload = await uploadFileToCloudinary(file);
+      const adminSupabase = createAdminSupabaseClient();
+
+      const { error: imgInsertError } = await adminSupabase.from("event_images").insert({
+        event_id: createdEvent.id,
+        image_url: imageUpload.secure_url,
+        cloudinary_public_id: imageUpload.public_id,
+        is_cover: true,
+      });
+      if (imgInsertError) console.error("Erro ao salvar event_images:", imgInsertError.message);
+
+      const { error: coverUpdateError } = await adminSupabase
+        .from("events")
+        .update({ cover_image_url: imageUpload.secure_url })
+        .eq("id", createdEvent.id);
+      if (coverUpdateError) console.error("Erro ao atualizar cover_image_url:", coverUpdateError.message);
+    } catch (err) {
+      console.error("Falha no upload da imagem para o Cloudinary:", err);
+    }
   }
 
   revalidatePath("/");
