@@ -1,4 +1,4 @@
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createAdminSupabaseClient, createServerSupabaseClient } from "@/lib/supabase/server";
 import { AgeRating, RegionalEvent } from "@/types/event";
 
 type EventImageRow = { image_url: string; is_cover: boolean };
@@ -145,7 +145,10 @@ export async function getApprovedEventsFromDb(options?: SearchOptions) {
 }
 
 export async function getEventBySlugFromDb(slug: string) {
-  const supabase = await createServerSupabaseClient();
+  // Admin client bypasses RLS so the nested joins to public.users
+  // (reviews → users, event_comments → users) can read full_name of
+  // other users, which the per-row policy "id = auth.uid()" would block.
+  const supabase = createAdminSupabaseClient();
 
   const { data, error } = await supabase
     .from("events")
