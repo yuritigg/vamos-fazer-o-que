@@ -25,7 +25,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
       <section className="overflow-hidden rounded-xl border">
         <div className="relative h-72 w-full bg-slate-100">
           {event.imageUrl ? (
-            <Image src={event.imageUrl} alt={event.title} fill className="object-cover" />
+            <Image src={event.imageUrl} alt={event.title} fill sizes="100vw" className="object-cover" />
           ) : (
             <div className="flex h-full items-center justify-center">
               <ImageIcon className="h-16 w-16 text-slate-300" />

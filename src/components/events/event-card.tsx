@@ -20,7 +20,7 @@ export function EventCard({ event }: EventCardProps) {
       <div className="relative h-52 w-full bg-slate-100">
         {event.imageUrl ? (
           <>
-            <Image src={event.imageUrl} alt={event.title} fill className="object-cover" />
+            <Image src={event.imageUrl} alt={event.title} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" className="object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent" />
           </>
         ) : (
