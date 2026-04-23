@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { Calendar, ImageIcon, MapPin, Star } from "lucide-react";
@@ -12,6 +14,7 @@ interface EventCardProps {
 }
 
 export function EventCard({ event }: EventCardProps) {
+  console.log("[EventCard]", event.slug, "imageUrl:", event.imageUrl);
   return (
     <Card className="overflow-hidden rounded-2xl border-slate-200/70 shadow-lg transition-transform duration-200 hover:-translate-y-1 hover:shadow-xl">
       <div className="relative h-52 w-full bg-slate-100">
