@@ -8,6 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CommentForm, ReviewForm } from "@/components/forms/event-feedback-forms";
 import { getEventBySlugFromDb } from "@/lib/supabase/events";
 
+export const dynamic = "force-dynamic";
+
 interface EventDetailPageProps {
   params: { slug: string };
 }

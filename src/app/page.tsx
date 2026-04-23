@@ -7,6 +7,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { getApprovedEventsFromDb } from "@/lib/supabase/events";
 import { cn } from "@/lib/utils";
 
+export const dynamic = "force-dynamic";
+
 interface HomePageProps {
   searchParams?: {
     erro?: string;
