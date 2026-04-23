@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Eye } from "lucide-react";
+import { Check, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -19,6 +19,11 @@ function formatDate(dateStr: string) {
     month: "long",
     year: "numeric",
   });
+}
+
+function formatPreco(preco: number | null) {
+  if (preco == null) return "Gratuito";
+  return `R$ ${preco.toFixed(2).replace(".", ",")}`;
 }
 
 export function EventDetailsModal({ event }: { event: AdminEvent }) {
@@ -48,6 +53,9 @@ export function EventDetailsModal({ event }: { event: AdminEvent }) {
           <div className="flex flex-wrap gap-2">
             <Badge variant="outline">{event.category}</Badge>
             <Badge variant="outline">{event.age_rating ?? "Livre"}</Badge>
+            {event.outdoor_indoor && (
+              <Badge variant="secondary" className="capitalize">{event.outdoor_indoor}</Badge>
+            )}
           </div>
 
           <div>
@@ -62,6 +70,13 @@ export function EventDetailsModal({ event }: { event: AdminEvent }) {
             </p>
           </div>
 
+          {event.local_nome && (
+            <div>
+              <p className="font-medium text-muted-foreground">Local</p>
+              <p>{event.local_nome}</p>
+            </div>
+          )}
+
           <div>
             <p className="font-medium text-muted-foreground">Endereço</p>
             <p>
@@ -70,6 +85,42 @@ export function EventDetailsModal({ event }: { event: AdminEvent }) {
               {event.city} — {event.state}
             </p>
           </div>
+
+          {event.vinculo && (
+            <div>
+              <p className="font-medium text-muted-foreground">Vínculo</p>
+              <p>{event.vinculo}</p>
+            </div>
+          )}
+
+          <div>
+            <p className="font-medium text-muted-foreground">Ingresso</p>
+            <p>{formatPreco(event.preco)}</p>
+          </div>
+
+          {event.modalidade_esportiva && (
+            <div>
+              <p className="font-medium text-muted-foreground">Modalidade esportiva</p>
+              <p>
+                {event.modalidade_esportiva}
+                {event.nivel_competitivo && ` — ${event.nivel_competitivo}`}
+              </p>
+            </div>
+          )}
+
+          {event.servicos && event.servicos.length > 0 && (
+            <div>
+              <p className="font-medium text-muted-foreground">Serviços disponíveis</p>
+              <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1">
+                {event.servicos.map((s) => (
+                  <span key={s} className="flex items-center gap-1 text-xs">
+                    <Check className="h-3 w-3 text-emerald-600" />
+                    {s}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div>
             <p className="font-medium text-muted-foreground">Descrição</p>

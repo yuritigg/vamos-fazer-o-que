@@ -22,6 +22,13 @@ type EventRow = {
   latitude: number | null;
   longitude: number | null;
   status: RegionalEvent["status"];
+  local_nome: string | null;
+  vinculo: string | null;
+  preco: number | null;
+  outdoor_indoor: string | null;
+  modalidade_esportiva: string | null;
+  nivel_competitivo: string | null;
+  servicos: string[] | null;
   organizers: OrganizerRow[] | null;
   event_images: EventImageRow[] | null;
   reviews: ReviewRow[] | null;
@@ -71,12 +78,20 @@ function toRegionalEvent(row: EventRow): RegionalEvent {
     averageRating,
     reviews,
     comments,
+    localNome: row.local_nome ?? null,
+    vinculo: row.vinculo ?? null,
+    preco: row.preco ?? null,
+    outdoorIndoor: row.outdoor_indoor ?? null,
+    modalidadeEsportiva: row.modalidade_esportiva ?? null,
+    nivelCompetitivo: row.nivel_competitivo ?? null,
+    servicos: row.servicos ?? null,
   };
 }
 
 const EVENT_SELECT = `
   id, slug, title, description, category, age_rating, cover_image_url, event_date, start_time,
   city, state, address, latitude, longitude, status,
+  local_nome, vinculo, preco, outdoor_indoor, modalidade_esportiva, nivel_competitivo, servicos,
   organizers (id, display_name),
   event_images (image_url, is_cover),
   reviews (id, rating, comment, users (full_name))
@@ -138,6 +153,7 @@ export async function getEventBySlugFromDb(slug: string) {
       `
       id, slug, title, description, category, age_rating, cover_image_url, event_date, start_time,
       city, state, address, latitude, longitude, status,
+      local_nome, vinculo, preco, outdoor_indoor, modalidade_esportiva, nivel_competitivo, servicos,
       organizers (id, display_name),
       event_images (image_url, is_cover),
       reviews (id, rating, comment, users (full_name)),
@@ -192,8 +208,14 @@ export type AdminEvent = {
   status: "pendente" | "aprovado" | "reprovado";
   created_at: string;
   organizerName: string;
+  local_nome: string | null;
+  vinculo: string | null;
+  preco: number | null;
+  outdoor_indoor: string | null;
+  modalidade_esportiva: string | null;
+  nivel_competitivo: string | null;
+  servicos: string[] | null;
 };
-
 
 export async function getAdminEventsFromDb(): Promise<AdminEvent[]> {
   const supabase = await createServerSupabaseClient();
@@ -204,6 +226,7 @@ export async function getAdminEventsFromDb(): Promise<AdminEvent[]> {
       `
       id, slug, title, description, category, age_rating,
       event_date, start_time, city, state, address, status, created_at,
+      local_nome, vinculo, preco, outdoor_indoor, modalidade_esportiva, nivel_competitivo, servicos,
       organizers (display_name, users (full_name)),
       event_images (image_url, is_cover)
     `,
@@ -220,6 +243,9 @@ export async function getAdminEventsFromDb(): Promise<AdminEvent[]> {
     age_rating: string | null;
     event_date: string; start_time: string; city: string; state: string; address: string;
     status: "pendente" | "aprovado" | "reprovado"; created_at: string;
+    local_nome: string | null; vinculo: string | null; preco: number | null;
+    outdoor_indoor: string | null; modalidade_esportiva: string | null;
+    nivel_competitivo: string | null; servicos: string[] | null;
     organizers: Array<{ display_name: string | null; users: Array<{ full_name: string | null }> | null }> | null;
     event_images: Array<{ image_url: string; is_cover: boolean }> | null;
   }>).map((row) => {
@@ -243,6 +269,13 @@ export async function getAdminEventsFromDb(): Promise<AdminEvent[]> {
         row.organizers?.[0]?.display_name ??
         row.organizers?.[0]?.users?.[0]?.full_name ??
         "Organizador",
+      local_nome: row.local_nome ?? null,
+      vinculo: row.vinculo ?? null,
+      preco: row.preco ?? null,
+      outdoor_indoor: row.outdoor_indoor ?? null,
+      modalidade_esportiva: row.modalidade_esportiva ?? null,
+      nivel_competitivo: row.nivel_competitivo ?? null,
+      servicos: row.servicos ?? null,
     };
   });
 }

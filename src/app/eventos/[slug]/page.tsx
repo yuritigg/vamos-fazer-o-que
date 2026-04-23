@@ -1,6 +1,20 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import { Calendar, ImageIcon, MapPin, MessageCircle, ShieldCheck, Star } from "lucide-react";
+import {
+  Building2,
+  Calendar,
+  Check,
+  Home,
+  ImageIcon,
+  Link2,
+  MapPin,
+  MessageCircle,
+  ShieldCheck,
+  Star,
+  Sun,
+  Ticket,
+  Trophy,
+} from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
@@ -14,14 +28,25 @@ interface EventDetailPageProps {
   params: { slug: string };
 }
 
+function formatPreco(preco: number | null) {
+  if (preco == null) return "Gratuito";
+  return `R$ ${preco.toFixed(2).replace(".", ",")}`;
+}
+
 export default async function EventDetailPage({ params }: EventDetailPageProps) {
   const event = await getEventBySlugFromDb(params.slug);
   if (!event) {
     notFound();
   }
 
+  const hasExtraInfo =
+    event.localNome || event.vinculo || event.preco !== null || event.outdoorIndoor ||
+    event.modalidadeEsportiva || event.nivelCompetitivo;
+  const hasServicos = event.servicos && event.servicos.length > 0;
+
   return (
     <div className="container mx-auto space-y-6 px-4 py-10">
+      {/* Hero */}
       <section className="overflow-hidden rounded-xl border">
         <div className="relative h-72 w-full bg-slate-100">
           {event.imageUrl ? (
@@ -39,6 +64,14 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
               <ShieldCheck className="h-3 w-3" />
               {event.ageRating}
             </Badge>
+            {event.outdoorIndoor && (
+              <Badge variant="secondary" className="capitalize">{event.outdoorIndoor}</Badge>
+            )}
+            {event.preco != null ? (
+              <Badge variant="secondary">{formatPreco(event.preco)}</Badge>
+            ) : (
+              <Badge variant="secondary">Gratuito</Badge>
+            )}
           </div>
           <h1 className="text-3xl font-bold">{event.title}</h1>
           <p className="text-muted-foreground">{event.description}</p>
@@ -48,6 +81,12 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
               {format(new Date(event.date), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })} às{" "}
               {event.startTime}
             </p>
+            {event.localNome && (
+              <p className="flex items-center gap-1">
+                <Building2 className="h-4 w-4" />
+                {event.localNome}
+              </p>
+            )}
             <p className="flex items-center gap-1">
               <MapPin className="h-4 w-4" />
               {event.location.endereco}, {event.location.cidade} - {event.location.estado}
@@ -56,6 +95,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
         </div>
       </section>
 
+      {/* Mapa + Avaliação média */}
       <section className="grid gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <CardHeader>
@@ -85,6 +125,69 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
         </Card>
       </section>
 
+      {/* Informações adicionais + Serviços */}
+      {(hasExtraInfo || hasServicos) && (
+        <section className="grid gap-6 lg:grid-cols-2">
+          {hasExtraInfo && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Informações</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2 text-sm">
+                {event.vinculo && (
+                  <div className="flex items-center gap-2">
+                    <Link2 className="h-4 w-4 shrink-0 text-muted-foreground" />
+                    <span>{event.vinculo}</span>
+                  </div>
+                )}
+                <div className="flex items-center gap-2">
+                  <Ticket className="h-4 w-4 shrink-0 text-muted-foreground" />
+                  <span>{formatPreco(event.preco)}</span>
+                </div>
+                {event.outdoorIndoor && (
+                  <div className="flex items-center gap-2">
+                    {event.outdoorIndoor === "outdoor" ? (
+                      <Sun className="h-4 w-4 shrink-0 text-muted-foreground" />
+                    ) : (
+                      <Home className="h-4 w-4 shrink-0 text-muted-foreground" />
+                    )}
+                    <span className="capitalize">{event.outdoorIndoor}</span>
+                  </div>
+                )}
+                {event.modalidadeEsportiva && (
+                  <div className="flex items-center gap-2">
+                    <Trophy className="h-4 w-4 shrink-0 text-muted-foreground" />
+                    <span>{event.modalidadeEsportiva}</span>
+                    {event.nivelCompetitivo && (
+                      <span className="text-muted-foreground">— {event.nivelCompetitivo}</span>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {hasServicos && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Serviços disponíveis</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {event.servicos!.map((servico) => (
+                    <div key={servico} className="flex items-center gap-2 text-sm">
+                      <Check className="h-4 w-4 shrink-0 text-emerald-600" />
+                      <span>{servico}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </section>
+      )}
+
+      {/* Avaliações + Comentários */}
       <section className="grid gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>

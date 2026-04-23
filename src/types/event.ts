@@ -22,6 +22,26 @@ export const AGE_RATINGS = [
 
 export type AgeRating = (typeof AGE_RATINGS)[number];
 
+export const VINCULOS = ["Federação", "Prefeitura", "Particular", "Outro"] as const;
+export type Vinculo = (typeof VINCULOS)[number];
+
+export const MODALIDADES_ESPORTIVAS = [
+  "Futebol",
+  "Vôlei",
+  "Atletismo",
+  "Futsal",
+  "Basquete",
+  "Handebol",
+  "Natação",
+  "Ciclismo",
+  "Corrida",
+  "Outro",
+] as const;
+export type ModalidadeEsportiva = (typeof MODALIDADES_ESPORTIVAS)[number];
+
+export const NIVEIS_COMPETITIVOS = ["Recreativo", "Amador", "Profissional"] as const;
+export type NivelCompetitivo = (typeof NIVEIS_COMPETITIVOS)[number];
+
 export type EventStatus = "pendente" | "aprovado" | "reprovado";
 
 export interface EventLocation {
@@ -62,4 +82,11 @@ export interface RegionalEvent {
   averageRating: number;
   reviews: EventReview[];
   comments: EventComment[];
+  localNome: string | null;
+  vinculo: string | null;
+  preco: number | null;
+  outdoorIndoor: string | null;
+  modalidadeEsportiva: string | null;
+  nivelCompetitivo: string | null;
+  servicos: string[] | null;
 }

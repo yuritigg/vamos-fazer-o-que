@@ -9,7 +9,28 @@ import { SubmitButton } from "@/components/forms/submit-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { AGE_RATINGS, EVENT_CATEGORIES } from "@/types/event";
+import {
+  AGE_RATINGS,
+  EVENT_CATEGORIES,
+  VINCULOS,
+  MODALIDADES_ESPORTIVAS,
+  NIVEIS_COMPETITIVOS,
+} from "@/types/event";
+
+const SERVICOS_LIST = [
+  "Copa",
+  "Cozinha",
+  "Estacionamento",
+  "Camping",
+  "Área arborizada",
+  "Assentos disponíveis",
+  "Acessibilidade",
+  "Banheiros",
+  "Wi-Fi",
+];
+
+const selectClass =
+  "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring";
 
 export function EventRegistrationForm() {
   const [state, action] = useFormState(createEventAction, INITIAL_ACTION_RESULT);
@@ -30,13 +51,31 @@ export function EventRegistrationForm() {
   const [lng, setLng] = useState("");
   const [cepStatus, setCepStatus] = useState<"idle" | "loading" | "error">("idle");
 
+  const [category, setCategory] = useState("");
+  const [tipoPreco, setTipoPreco] = useState<"gratuito" | "pago">("gratuito");
+  const [servicos, setServicos] = useState<string[]>([]);
+  const [copaAlcoolica, setCopaAlcoolica] = useState(false);
+
+  const isEsporte = category === "Esporte";
+  const servicosValue = JSON.stringify([
+    ...servicos,
+    ...(copaAlcoolica && servicos.includes("Copa") ? ["Venda de bebida alcoólica"] : []),
+  ]);
+
+  function toggleServico(servico: string, checked: boolean) {
+    if (checked) {
+      setServicos((prev) => [...prev, servico]);
+    } else {
+      setServicos((prev) => prev.filter((s) => s !== servico));
+      if (servico === "Copa") setCopaAlcoolica(false);
+    }
+  }
+
   async function fetchViaCep(value: string) {
     const cleaned = value.replace(/\D/g, "");
     setCep(cleaned);
     setCepStatus("idle");
-
     if (cleaned.length !== 8) return;
-
     setCepStatus("loading");
     try {
       const res = await fetch(`https://viacep.com.br/ws/${cleaned}/json/`);
@@ -82,7 +121,6 @@ export function EventRegistrationForm() {
 
   return (
     <form action={action} className="grid gap-5">
-
       {/* Título */}
       <div className="space-y-2">
         <Label htmlFor="title">Título do evento *</Label>
@@ -98,15 +136,12 @@ export function EventRegistrationForm() {
             name="category"
             required
             defaultValue=""
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
+            onChange={(e) => setCategory(e.target.value)}
+            className={selectClass}
           >
-            <option value="" disabled>
-              Selecione
-            </option>
+            <option value="" disabled>Selecione</option>
             {EVENT_CATEGORIES.map((cat) => (
-              <option key={cat} value={cat}>
-                {cat}
-              </option>
+              <option key={cat} value={cat}>{cat}</option>
             ))}
           </select>
         </div>
@@ -117,16 +152,49 @@ export function EventRegistrationForm() {
             name="ageRating"
             required
             defaultValue="Livre"
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
+            className={selectClass}
           >
             {AGE_RATINGS.map((r) => (
-              <option key={r} value={r}>
-                {r}
-              </option>
+              <option key={r} value={r}>{r}</option>
             ))}
           </select>
         </div>
       </div>
+
+      {/* Campos condicionais — Esporte */}
+      {isEsporte && (
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="modalidadeEsportiva">Modalidade esportiva *</Label>
+            <select
+              id="modalidadeEsportiva"
+              name="modalidadeEsportiva"
+              required
+              defaultValue=""
+              className={selectClass}
+            >
+              <option value="" disabled>Selecione</option>
+              {MODALIDADES_ESPORTIVAS.map((m) => (
+                <option key={m} value={m}>{m}</option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="nivelCompetitivo">Nível competitivo</Label>
+            <select
+              id="nivelCompetitivo"
+              name="nivelCompetitivo"
+              defaultValue=""
+              className={selectClass}
+            >
+              <option value="">Selecione</option>
+              {NIVEIS_COMPETITIVOS.map((n) => (
+                <option key={n} value={n}>{n}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+      )}
 
       {/* Data + Horário */}
       <div className="grid gap-4 sm:grid-cols-2">
@@ -139,6 +207,127 @@ export function EventRegistrationForm() {
           <Input id="startTime" name="startTime" type="time" required />
         </div>
       </div>
+
+      {/* Local + Vínculo */}
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-2">
+          <Label htmlFor="localNome">Local do evento</Label>
+          <Input
+            id="localNome"
+            name="localNome"
+            placeholder="Ex: Ginásio Municipal, Igreja São João"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="vinculo">Vínculo</Label>
+          <select id="vinculo" name="vinculo" defaultValue="" className={selectClass}>
+            <option value="">Selecione</option>
+            {VINCULOS.map((v) => (
+              <option key={v} value={v}>{v}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {/* Ingresso */}
+      <fieldset className="space-y-3 rounded-lg border p-4">
+        <legend className="px-1 text-sm font-medium">Ingresso</legend>
+        <div className="flex gap-6">
+          <label className="flex cursor-pointer items-center gap-2 text-sm">
+            <input
+              type="radio"
+              name="tipoPreco"
+              value="gratuito"
+              checked={tipoPreco === "gratuito"}
+              onChange={() => setTipoPreco("gratuito")}
+              className="accent-blue-600"
+            />
+            Gratuito
+          </label>
+          <label className="flex cursor-pointer items-center gap-2 text-sm">
+            <input
+              type="radio"
+              name="tipoPreco"
+              value="pago"
+              checked={tipoPreco === "pago"}
+              onChange={() => setTipoPreco("pago")}
+              className="accent-blue-600"
+            />
+            Pago
+          </label>
+        </div>
+        {tipoPreco === "pago" && (
+          <div className="space-y-2">
+            <Label htmlFor="preco">Valor do ingresso (R$) *</Label>
+            <Input
+              id="preco"
+              name="preco"
+              type="number"
+              min="0.01"
+              step="0.01"
+              placeholder="0,00"
+              required
+            />
+          </div>
+        )}
+      </fieldset>
+
+      {/* Ambiente */}
+      <div className="space-y-2">
+        <Label>Ambiente</Label>
+        <div className="flex gap-6">
+          <label className="flex cursor-pointer items-center gap-2 text-sm">
+            <input
+              type="radio"
+              name="outdoorIndoor"
+              value="indoor"
+              className="accent-blue-600"
+            />
+            Indoor
+          </label>
+          <label className="flex cursor-pointer items-center gap-2 text-sm">
+            <input
+              type="radio"
+              name="outdoorIndoor"
+              value="outdoor"
+              className="accent-blue-600"
+            />
+            Outdoor
+          </label>
+        </div>
+      </div>
+
+      {/* Serviços disponíveis */}
+      <fieldset className="space-y-3 rounded-lg border p-4">
+        <legend className="px-1 text-sm font-medium">Serviços disponíveis</legend>
+        <div className="grid gap-2 sm:grid-cols-2">
+          {SERVICOS_LIST.map((servico) => (
+            <div key={servico}>
+              <label className="flex cursor-pointer items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={servicos.includes(servico)}
+                  onChange={(e) => toggleServico(servico, e.target.checked)}
+                  className="accent-blue-600"
+                />
+                {servico}
+              </label>
+              {servico === "Copa" && servicos.includes("Copa") && (
+                <label className="ml-6 mt-1 flex cursor-pointer items-center gap-2 text-sm text-muted-foreground">
+                  <input
+                    type="checkbox"
+                    checked={copaAlcoolica}
+                    onChange={(e) => setCopaAlcoolica(e.target.checked)}
+                    className="accent-blue-600"
+                  />
+                  Venda de bebida alcoólica
+                </label>
+              )}
+            </div>
+          ))}
+        </div>
+        <input type="hidden" name="servicos" value={servicosValue} />
+      </fieldset>
 
       {/* Localização */}
       <fieldset className="space-y-4 rounded-lg border p-4">

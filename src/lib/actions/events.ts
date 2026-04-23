@@ -50,7 +50,6 @@ export async function createEventAction(_: ActionResult, formData: FormData): Pr
   const startTime = String(formData.get("startTime") ?? "");
   const description = String(formData.get("description") ?? "").trim();
 
-  // Address fields
   const street = String(formData.get("street") ?? "").trim();
   const number = String(formData.get("number") ?? "").trim();
   const complement = String(formData.get("complement") ?? "").trim();
@@ -63,13 +62,32 @@ export async function createEventAction(_: ActionResult, formData: FormData): Pr
   const addressParts = [street, number, complement, neighborhood].filter(Boolean);
   const address = addressParts.join(", ");
 
+  const localNome = String(formData.get("localNome") ?? "").trim();
+  const vinculo = String(formData.get("vinculo") ?? "").trim();
+  const tipoPreco = String(formData.get("tipoPreco") ?? "gratuito");
+  const precoRaw = String(formData.get("preco") ?? "").replace(",", ".");
+  const preco = tipoPreco === "pago" && precoRaw ? parseFloat(precoRaw) : null;
+  const outdoorIndoor = String(formData.get("outdoorIndoor") ?? "").trim();
+  const modalidadeEsportiva = String(formData.get("modalidadeEsportiva") ?? "").trim();
+  const nivelCompetitivo = String(formData.get("nivelCompetitivo") ?? "").trim();
+
+  let servicos: string[] = [];
+  try {
+    servicos = JSON.parse(String(formData.get("servicos") ?? "[]"));
+  } catch {
+    servicos = [];
+  }
+
   const file = formData.get("image");
 
   if (!title || !category || !ageRating || !eventDate || !startTime || !description || !street || !number || !neighborhood || !city || !state) {
     return { ok: false, message: "Preencha todos os campos obrigatórios." };
   }
 
-  // Upload da imagem ANTES de criar o evento para incluir a URL no INSERT
+  if (tipoPreco === "pago" && (!preco || preco <= 0)) {
+    return { ok: false, message: "Informe um preço válido maior que zero." };
+  }
+
   let coverImageUrl: string | null = null;
   let cloudinaryPublicId: string | null = null;
   if (file instanceof File && file.size > 0) {
@@ -103,6 +121,13 @@ export async function createEventAction(_: ActionResult, formData: FormData): Pr
       longitude: Number.isFinite(longitude) && longitude !== 0 ? longitude : null,
       status: "pendente",
       cover_image_url: coverImageUrl,
+      local_nome: localNome || null,
+      vinculo: vinculo || null,
+      preco: preco,
+      outdoor_indoor: outdoorIndoor || null,
+      modalidade_esportiva: modalidadeEsportiva || null,
+      nivel_competitivo: nivelCompetitivo || null,
+      servicos: servicos.length > 0 ? servicos : null,
     })
     .select("id")
     .single();
