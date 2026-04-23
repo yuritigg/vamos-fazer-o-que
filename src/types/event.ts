@@ -54,7 +54,7 @@ export interface RegionalEvent {
   category: EventCategory;
   date: string;
   startTime: string;
-  imageUrl: string;
+  imageUrl: string | null;
   organizerName: string;
   location: EventLocation;
   status: EventStatus;

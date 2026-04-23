@@ -47,10 +47,7 @@ function toRegionalEvent(row: EventRow): RegionalEvent {
       ? reviews.reduce((acc: number, r: { rating: number }) => acc + r.rating, 0) / reviews.length
       : 0;
 
-  const coverUrl =
-    row.cover_image_url ??
-    cover?.image_url ??
-    null;
+  const coverUrl = row.cover_image_url ?? cover?.image_url ?? null;
 
   return {
     id: row.id,
@@ -61,9 +58,7 @@ function toRegionalEvent(row: EventRow): RegionalEvent {
     ageRating: (row.age_rating as AgeRating) ?? "Livre",
     date: row.event_date,
     startTime: row.start_time,
-    imageUrl:
-      coverUrl ??
-      "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80",
+    imageUrl: coverUrl,
     organizerName: row.organizers?.[0]?.display_name ?? "Organizador",
     location: {
       cidade: row.city,
@@ -80,7 +75,7 @@ function toRegionalEvent(row: EventRow): RegionalEvent {
 }
 
 const EVENT_SELECT = `
-  id, slug, title, description, category, age_rating, event_date, start_time,
+  id, slug, title, description, category, age_rating, cover_image_url, event_date, start_time,
   city, state, address, latitude, longitude, status,
   organizers (id, display_name),
   event_images (image_url, is_cover),
@@ -141,7 +136,7 @@ export async function getEventBySlugFromDb(slug: string) {
     .from("events")
     .select(
       `
-      id, slug, title, description, category, age_rating, event_date, start_time,
+      id, slug, title, description, category, age_rating, cover_image_url, event_date, start_time,
       city, state, address, latitude, longitude, status,
       organizers (id, display_name),
       event_images (image_url, is_cover),

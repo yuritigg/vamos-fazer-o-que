@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Calendar, MapPin, Star } from "lucide-react";
+import { Calendar, ImageIcon, MapPin, Star } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
@@ -14,9 +14,17 @@ interface EventCardProps {
 export function EventCard({ event }: EventCardProps) {
   return (
     <Card className="overflow-hidden rounded-2xl border-slate-200/70 shadow-lg transition-transform duration-200 hover:-translate-y-1 hover:shadow-xl">
-      <div className="relative h-52 w-full">
-        <Image src={event.imageUrl} alt={event.title} fill className="object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent" />
+      <div className="relative h-52 w-full bg-slate-100">
+        {event.imageUrl ? (
+          <>
+            <Image src={event.imageUrl} alt={event.title} fill className="object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent" />
+          </>
+        ) : (
+          <div className="flex h-full items-center justify-center">
+            <ImageIcon className="h-12 w-12 text-slate-300" />
+          </div>
+        )}
       </div>
       <CardHeader className="space-y-3">
         <div className="flex items-center justify-between gap-2">

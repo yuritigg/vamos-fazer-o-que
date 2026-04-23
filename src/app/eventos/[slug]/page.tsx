@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import { Calendar, MapPin, MessageCircle, ShieldCheck, Star } from "lucide-react";
+import { Calendar, ImageIcon, MapPin, MessageCircle, ShieldCheck, Star } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
@@ -21,8 +21,14 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
   return (
     <div className="container mx-auto space-y-6 px-4 py-10">
       <section className="overflow-hidden rounded-xl border">
-        <div className="relative h-72 w-full">
-          <Image src={event.imageUrl} alt={event.title} fill className="object-cover" />
+        <div className="relative h-72 w-full bg-slate-100">
+          {event.imageUrl ? (
+            <Image src={event.imageUrl} alt={event.title} fill className="object-cover" />
+          ) : (
+            <div className="flex h-full items-center justify-center">
+              <ImageIcon className="h-16 w-16 text-slate-300" />
+            </div>
+          )}
         </div>
         <div className="space-y-4 p-6">
           <div className="flex flex-wrap items-center gap-2">
