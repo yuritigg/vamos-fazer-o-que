@@ -29,6 +29,13 @@ export const mockEvents: RegionalEvent[] = [
     comments: [
       { id: "c1", author: "Juliana", message: "Vai ter estacionamento no local?", createdAt: "2026-04-10T10:30:00Z" },
     ],
+    localNome: null,
+    vinculo: null,
+    preco: null,
+    outdoorIndoor: null,
+    modalidadeEsportiva: null,
+    nivelCompetitivo: null,
+    servicos: null,
   },
   {
     id: "2",
@@ -53,6 +60,13 @@ export const mockEvents: RegionalEvent[] = [
     averageRating: 4.5,
     reviews: [{ id: "r3", author: "Igor", rating: 5, comment: "Estrutura excelente para corrida." }],
     comments: [],
+    localNome: null,
+    vinculo: null,
+    preco: null,
+    outdoorIndoor: null,
+    modalidadeEsportiva: null,
+    nivelCompetitivo: null,
+    servicos: null,
   },
   {
     id: "3",
@@ -77,6 +91,13 @@ export const mockEvents: RegionalEvent[] = [
     averageRating: 0,
     reviews: [],
     comments: [],
+    localNome: null,
+    vinculo: null,
+    preco: null,
+    outdoorIndoor: null,
+    modalidadeEsportiva: null,
+    nivelCompetitivo: null,
+    servicos: null,
   },
 ];
 
