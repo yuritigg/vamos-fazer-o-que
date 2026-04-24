@@ -45,10 +45,19 @@ export async function moderateEvent({
     return { error: updateError.message };
   }
 
-  const organizerRelation = Array.isArray(eventData.organizers) ? eventData.organizers[0] : null;
-  const organizerUser = Array.isArray(organizerRelation?.users) ? organizerRelation.users[0] : null;
-  const organizerUserId = organizerUser?.id;
-  const organizerEmail = organizerUser?.email;
+  // organizers and users are single objects (many-to-one FK), not arrays
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const organizerRelation = (eventData.organizers as any) as { users: { id: string; email: string | null } | null } | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const organizerUser = (organizerRelation?.users as any) as { id: string; email: string | null } | null;
+  const organizerUserId = organizerUser?.id ?? null;
+  const organizerEmail = organizerUser?.email ?? null;
+
+  console.log("[moderateEvent] eventData.organizers raw:", JSON.stringify(eventData.organizers));
+  console.log("[moderateEvent] organizerRelation:", JSON.stringify(organizerRelation));
+  console.log("[moderateEvent] organizerUser:", JSON.stringify(organizerUser));
+  console.log("[moderateEvent] organizerUserId:", organizerUserId, "| organizerEmail:", organizerEmail);
+
   if (organizerUserId) {
     await supabase.from("notifications").insert({
       user_id: organizerUserId,
@@ -63,12 +72,22 @@ export async function moderateEvent({
     });
 
     if (organizerEmail) {
-      await sendEventStatusEmail({
-        to: organizerEmail,
-        eventTitle: eventData.title,
-        status,
-      });
+      console.log("[moderateEvent] Enviando e-mail para:", organizerEmail, "| status:", status);
+      try {
+        const emailResult = await sendEventStatusEmail({
+          to: organizerEmail,
+          eventTitle: eventData.title,
+          status,
+        });
+        console.log("[moderateEvent] E-mail enviado com sucesso:", JSON.stringify(emailResult));
+      } catch (emailErr) {
+        console.error("[moderateEvent] Falha ao enviar e-mail:", emailErr);
+      }
+    } else {
+      console.warn("[moderateEvent] Organizador sem e-mail — e-mail não enviado. userId:", organizerUserId);
     }
+  } else {
+    console.warn("[moderateEvent] Não foi possível identificar o organizador para o evento:", eventId);
   }
 
   revalidatePath("/admin");
