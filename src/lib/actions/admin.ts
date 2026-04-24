@@ -23,7 +23,7 @@ export async function moderateEvent({
   const supabase = await createServerSupabaseClient();
   const { data: eventData, error: eventError } = await supabase
     .from("events")
-    .select("id, title, organizers (users (id, email))")
+    .select("id, slug, title, organizers (users (id, email))")
     .eq("id", eventId)
     .single();
 
@@ -77,7 +77,9 @@ export async function moderateEvent({
         const emailResult = await sendEventStatusEmail({
           to: organizerEmail,
           eventTitle: eventData.title,
+          eventSlug: (eventData as { slug?: string }).slug,
           status,
+          rejectionReason,
         });
         console.log("[moderateEvent] E-mail enviado com sucesso:", JSON.stringify(emailResult));
       } catch (emailErr) {
