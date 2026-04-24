@@ -203,3 +203,43 @@ export async function createCommentAction(_: ActionResult, formData: FormData): 
   if (eventSlug) revalidatePath(`/eventos/${eventSlug}`);
   return { ok: true, message: "Comentário enviado com sucesso." };
 }
+
+export async function deleteReviewAction(_: ActionResult, formData: FormData): Promise<ActionResult> {
+  const { user, profile } = await getCurrentUserProfile();
+  if (!user || !profile) return { ok: false, message: "Não autorizado." };
+
+  const isAdmin = profile.is_admin || profile.role === "admin";
+  if (!isAdmin) return { ok: false, message: "Apenas admins podem excluir avaliações." };
+
+  const reviewId = String(formData.get("reviewId") ?? "");
+  const eventSlug = String(formData.get("eventSlug") ?? "");
+  if (!reviewId) return { ok: false, message: "ID da avaliação não informado." };
+
+  const supabase = createAdminSupabaseClient();
+  const { error } = await supabase.from("reviews").delete().eq("id", reviewId);
+
+  if (error) return { ok: false, message: error.message };
+
+  if (eventSlug) revalidatePath(`/eventos/${eventSlug}`);
+  return { ok: true, message: "Avaliação excluída." };
+}
+
+export async function deleteCommentAction(_: ActionResult, formData: FormData): Promise<ActionResult> {
+  const { user, profile } = await getCurrentUserProfile();
+  if (!user || !profile) return { ok: false, message: "Não autorizado." };
+
+  const isAdmin = profile.is_admin || profile.role === "admin";
+  if (!isAdmin) return { ok: false, message: "Apenas admins podem excluir comentários." };
+
+  const commentId = String(formData.get("commentId") ?? "");
+  const eventSlug = String(formData.get("eventSlug") ?? "");
+  if (!commentId) return { ok: false, message: "ID do comentário não informado." };
+
+  const supabase = createAdminSupabaseClient();
+  const { error } = await supabase.from("event_comments").delete().eq("id", commentId);
+
+  if (error) return { ok: false, message: error.message };
+
+  if (eventSlug) revalidatePath(`/eventos/${eventSlug}`);
+  return { ok: true, message: "Comentário excluído." };
+}

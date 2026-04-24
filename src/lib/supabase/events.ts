@@ -3,8 +3,9 @@ import { AgeRating, RegionalEvent } from "@/types/event";
 
 type EventImageRow = { image_url: string; is_cover: boolean };
 type NamedUserRow = { full_name: string | null };
-type ReviewRow = { id: string; rating: number; comment: string | null; users: NamedUserRow[] | null };
-type CommentRow = { id: string; message: string; created_at: string; users: NamedUserRow[] | null };
+// reviews.user_id → users.id is many-to-one, so Supabase returns a single object, not an array
+type ReviewRow = { id: string; rating: number; comment: string | null; users: NamedUserRow | null };
+type CommentRow = { id: string; message: string; created_at: string; users: NamedUserRow | null };
 type OrganizerRow = { id: string; display_name: string | null };
 type EventRow = {
   id: string;
@@ -37,18 +38,24 @@ type EventRow = {
 
 function toRegionalEvent(row: EventRow): RegionalEvent {
   const cover = row.event_images?.find((img) => img.is_cover) ?? row.event_images?.[0];
-  const reviews = (row.reviews ?? []).map((review) => ({
-    id: review.id,
-    author: review.users?.[0]?.full_name ?? "Usuário",
-    rating: review.rating,
-    comment: review.comment ?? "",
-  }));
-  const comments = (row.event_comments ?? []).map((comment) => ({
-    id: comment.id,
-    author: comment.users?.[0]?.full_name ?? "Usuário",
-    message: comment.message,
-    createdAt: comment.created_at,
-  }));
+  const reviews = (row.reviews ?? []).map((review) => {
+    console.log("[DEBUG] review.users raw:", JSON.stringify(review.users));
+    return {
+      id: review.id,
+      author: review.users?.full_name ?? "Usuário",
+      rating: review.rating,
+      comment: review.comment ?? "",
+    };
+  });
+  const comments = (row.event_comments ?? []).map((comment) => {
+    console.log("[DEBUG] comment.users raw:", JSON.stringify(comment.users));
+    return {
+      id: comment.id,
+      author: comment.users?.full_name ?? "Usuário",
+      message: comment.message,
+      createdAt: comment.created_at,
+    };
+  });
   const averageRating =
     reviews.length > 0
       ? reviews.reduce((acc: number, r: { rating: number }) => acc + r.rating, 0) / reviews.length

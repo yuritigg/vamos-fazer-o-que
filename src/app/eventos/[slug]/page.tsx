@@ -20,7 +20,9 @@ import { ptBR } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CommentForm, ReviewForm } from "@/components/forms/event-feedback-forms";
+import { DeleteFeedbackButton } from "@/components/admin/delete-feedback-button";
 import { getEventBySlugFromDb } from "@/lib/supabase/events";
+import { getCurrentUserProfile } from "@/lib/supabase/authz";
 
 export const dynamic = "force-dynamic";
 
@@ -34,10 +36,14 @@ function formatPreco(preco: number | null) {
 }
 
 export default async function EventDetailPage({ params }: EventDetailPageProps) {
-  const event = await getEventBySlugFromDb(params.slug);
+  const [event, { profile }] = await Promise.all([
+    getEventBySlugFromDb(params.slug),
+    getCurrentUserProfile(),
+  ]);
   if (!event) {
     notFound();
   }
+  const isAdmin = !!(profile?.is_admin || profile?.role === "admin");
 
   const hasExtraInfo =
     event.localNome || event.vinculo || event.preco !== null || event.outdoorIndoor ||
@@ -200,9 +206,16 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
             ) : (
               event.reviews.map((review) => (
                 <article key={review.id} className="rounded-md border p-3">
-                  <p className="text-sm font-medium">{review.author}</p>
-                  <p className="text-xs text-muted-foreground">Nota: {review.rating}/5</p>
-                  <p className="text-sm text-muted-foreground">{review.comment}</p>
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <p className="text-sm font-medium">{review.author}</p>
+                      <p className="text-xs text-muted-foreground">Nota: {review.rating}/5</p>
+                    </div>
+                    {isAdmin && (
+                      <DeleteFeedbackButton type="review" itemId={review.id} eventSlug={event.slug} />
+                    )}
+                  </div>
+                  <p className="mt-1 text-sm text-muted-foreground">{review.comment}</p>
                 </article>
               ))
             )}
@@ -223,8 +236,13 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
             ) : (
               event.comments.map((comment) => (
                 <article key={comment.id} className="rounded-md border p-3">
-                  <p className="text-sm font-medium">{comment.author}</p>
-                  <p className="text-sm text-muted-foreground">{comment.message}</p>
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="text-sm font-medium">{comment.author}</p>
+                    {isAdmin && (
+                      <DeleteFeedbackButton type="comment" itemId={comment.id} eventSlug={event.slug} />
+                    )}
+                  </div>
+                  <p className="mt-1 text-sm text-muted-foreground">{comment.message}</p>
                 </article>
               ))
             )}
