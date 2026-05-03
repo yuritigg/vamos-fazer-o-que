@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,29 +14,41 @@ interface EventSearchFiltersProps {
 }
 
 export function EventSearchFilters({ currentQ, currentCategoria }: EventSearchFiltersProps) {
-  const formRef = useRef<HTMLFormElement>(null);
-  const categoryRef = useRef<HTMLSelectElement>(null);
+  const router = useRouter();
+  const [q, setQ] = useState(currentQ);
 
-  function handleCategoryClick(cat: string) {
-    if (categoryRef.current) categoryRef.current.value = cat;
-    formRef.current?.submit();
+  // Sync controlled input when URL search param changes (soft navigation)
+  useEffect(() => {
+    setQ(currentQ);
+  }, [currentQ]);
+
+  function navigate(searchQ: string, categoria: string) {
+    const params = new URLSearchParams();
+    if (searchQ.trim()) params.set("q", searchQ.trim());
+    if (categoria) params.set("categoria", categoria);
+    const qs = params.toString();
+    router.push(qs ? `/?${qs}` : "/");
   }
 
   return (
     <div className="space-y-4">
       {/* Search row */}
-      <form ref={formRef} method="GET" action="/" className="flex gap-2">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          navigate(q, currentCategoria);
+        }}
+        className="flex gap-2"
+      >
         <div className="relative flex-1">
           <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            name="q"
-            defaultValue={currentQ}
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
             placeholder="Buscar eventos, organizadores..."
             className="h-12 pl-10 text-sm"
           />
         </div>
-        {/* Hidden select for category value */}
-        <select ref={categoryRef} name="categoria" defaultValue={currentCategoria} className="hidden" />
         <Button type="submit" size="lg" className="h-12 shrink-0 px-6">
           Buscar
         </Button>
@@ -45,7 +58,7 @@ export function EventSearchFilters({ currentQ, currentCategoria }: EventSearchFi
       <div className="flex gap-2 overflow-x-auto pb-0.5 scrollbar-hide">
         <button
           type="button"
-          onClick={() => handleCategoryClick("")}
+          onClick={() => navigate(q, "")}
           className={cn(
             "shrink-0 rounded-full border px-4 py-1.5 text-sm font-medium transition-all duration-200",
             !currentCategoria
@@ -59,7 +72,7 @@ export function EventSearchFilters({ currentQ, currentCategoria }: EventSearchFi
           <button
             key={cat}
             type="button"
-            onClick={() => handleCategoryClick(cat)}
+            onClick={() => navigate(q, cat)}
             className={cn(
               "shrink-0 rounded-full border px-4 py-1.5 text-sm font-medium transition-all duration-200",
               currentCategoria === cat
