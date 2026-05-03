@@ -1,9 +1,8 @@
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, CalendarCheck } from "lucide-react";
 import { EventList } from "@/components/events/event-list";
 import { EventSearchFilters } from "@/components/events/event-search-filters";
 import { buttonVariants } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { getApprovedEventsFromDb } from "@/lib/supabase/events";
 import { cn } from "@/lib/utils";
 
@@ -33,15 +32,16 @@ function ErrorMessage({ code }: { code?: string }) {
         };
 
   return (
-    <Card className="border-destructive/40 bg-destructive/5">
-      <CardContent className="space-y-3 p-4">
-        <h2 className="text-lg font-semibold text-destructive">{config.title}</h2>
-        <p className="text-sm text-muted-foreground">{config.description}</p>
-        <Link href="/login" className={cn(buttonVariants({ size: "sm", variant: "outline" }))}>
-          Ir para login
-        </Link>
-      </CardContent>
-    </Card>
+    <div className="mb-8 rounded-xl border border-destructive/30 bg-destructive/5 px-5 py-4">
+      <p className="font-semibold text-destructive">{config.title}</p>
+      <p className="mt-0.5 text-sm text-muted-foreground">{config.description}</p>
+      <Link
+        href="/login"
+        className={cn(buttonVariants({ size: "sm", variant: "outline" }), "mt-3")}
+      >
+        Ir para login
+      </Link>
+    </div>
   );
 }
 
@@ -54,49 +54,95 @@ export default async function Home({ searchParams }: HomePageProps) {
     q: q || undefined,
   });
 
+  const isFiltered = Boolean(q || categoria);
+
   return (
-    <div className="container mx-auto space-y-10 px-4 py-10">
-      <ErrorMessage code={searchParams?.erro} />
-
-      {searchParams?.sucesso === "evento-enviado" && (
-        <Card className="border-emerald-500/40 bg-emerald-500/5">
-          <CardContent className="p-4">
-            <p className="font-semibold text-emerald-700">Evento enviado para aprovação!</p>
-            <p className="text-sm text-muted-foreground">
-              Nossa equipe irá analisar as informações e você será notificado em breve.
+    <div>
+      {/* Hero */}
+      <section className="border-b border-border/50 px-4 pb-14 pt-16 md:pt-24">
+        <div className="container mx-auto">
+          <div className="max-w-2xl animate-fade-up">
+            <p className="mb-5 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-primary">
+              <CalendarCheck className="h-3.5 w-3.5" />
+              Portal de eventos regionais
             </p>
-          </CardContent>
-        </Card>
-      )}
+            <h1 className="text-balance text-5xl font-bold leading-[1.1] tracking-tight text-foreground md:text-6xl">
+              Descubra o que rola perto de você
+            </h1>
+            <p className="mt-5 max-w-[52ch] text-lg leading-relaxed text-muted-foreground">
+              Shows, feiras, esportes, teatro e muito mais. Conectamos você às melhores experiências da sua região.
+            </p>
+          </div>
 
-      <section className="relative overflow-hidden rounded-3xl border border-slate-200/60 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 p-8 text-white shadow-2xl">
-        <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-sky-400/25 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-20 left-20 h-48 w-48 rounded-full bg-indigo-500/25 blur-3xl" />
-        <div className="max-w-2xl space-y-4">
-          <p className="text-sm font-medium text-sky-300">Portal de eventos regionais</p>
-          <h1 className="text-4xl font-bold tracking-tight">
-            Descubra tudo o que está rolando perto de você
-          </h1>
-          <p className="text-slate-200">
-            Conectamos pessoas aos melhores eventos da região e ajudamos organizadores a divulgar experiências incríveis.
-          </p>
-          <Link
-            href="/cadastro-evento"
-            className={cn(buttonVariants(), "bg-sky-500 text-slate-950 hover:bg-sky-400")}
-          >
-            Publicar evento
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Link>
+          <div className="mt-10 animate-fade-up [animation-delay:80ms]">
+            <EventSearchFilters currentQ={q} currentCategoria={categoria} />
+          </div>
         </div>
       </section>
 
-      <section className="space-y-5">
-        <EventSearchFilters currentQ={q} currentCategoria={categoria} />
-        <p className="text-sm text-muted-foreground">
-          {events.length} evento(s) encontrado(s)
-          {q || categoria ? " para esta busca" : ""}
-        </p>
+      {/* Events */}
+      <section className="container mx-auto px-4 py-12">
+        <ErrorMessage code={searchParams?.erro} />
+
+        {searchParams?.sucesso === "evento-enviado" && (
+          <div className="mb-8 rounded-xl border border-emerald-500/30 bg-emerald-50 px-5 py-4">
+            <p className="font-semibold text-emerald-700">Evento enviado para aprovação.</p>
+            <p className="mt-0.5 text-sm text-emerald-600/80">
+              Nossa equipe analisará as informações e você será notificado em breve.
+            </p>
+          </div>
+        )}
+
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h2 className="text-xl font-semibold tracking-tight text-foreground">
+              {isFiltered ? "Resultados da busca" : "Eventos em destaque"}
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {events.length === 0
+                ? "Nenhum evento encontrado"
+                : `${events.length} evento${events.length !== 1 ? "s" : ""}${isFiltered ? ` encontrado${events.length !== 1 ? "s" : ""}` : " disponíveis"}`}
+            </p>
+          </div>
+          {!isFiltered && (
+            <Link
+              href="/cadastro-evento"
+              className={cn(
+                buttonVariants({ variant: "outline", size: "sm" }),
+                "hidden md:flex"
+              )}
+            >
+              Publicar evento
+              <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+            </Link>
+          )}
+        </div>
+
         <EventList events={events} />
+
+        {/* CTA bottom — shown when no filters active */}
+        {!isFiltered && events.length > 0 && (
+          <div className="mt-16 rounded-2xl border border-border/60 bg-muted/30 px-8 py-10 text-center">
+            <h3 className="text-lg font-semibold tracking-tight text-foreground">
+              Você organiza eventos?
+            </h3>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Cadastre-se como organizador e divulgue suas experiências para toda a região.
+            </p>
+            <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+              <Link href="/cadastro" className={cn(buttonVariants())}>
+                Criar conta de organizador
+                <ArrowRight className="ml-1.5 h-4 w-4" />
+              </Link>
+              <Link
+                href="/login"
+                className={cn(buttonVariants({ variant: "ghost" }), "text-muted-foreground")}
+              >
+                Já tenho conta
+              </Link>
+            </div>
+          </div>
+        )}
       </section>
     </div>
   );

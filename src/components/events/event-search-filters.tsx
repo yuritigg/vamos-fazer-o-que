@@ -5,6 +5,7 @@ import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { EVENT_CATEGORIES } from "@/types/event";
+import { cn } from "@/lib/utils";
 
 interface EventSearchFiltersProps {
   currentQ: string;
@@ -13,34 +14,63 @@ interface EventSearchFiltersProps {
 
 export function EventSearchFilters({ currentQ, currentCategoria }: EventSearchFiltersProps) {
   const formRef = useRef<HTMLFormElement>(null);
+  const categoryRef = useRef<HTMLSelectElement>(null);
+
+  function handleCategoryClick(cat: string) {
+    if (categoryRef.current) categoryRef.current.value = cat;
+    formRef.current?.submit();
+  }
 
   return (
-    <form ref={formRef} method="GET" action="/" className="flex flex-col gap-3 sm:flex-row sm:items-center">
-      <div className="relative flex-1">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          name="q"
-          defaultValue={currentQ}
-          placeholder="Buscar por nome do evento, organizador ou categoria..."
-          className="pl-9"
-        />
-      </div>
-      <select
-        name="categoria"
-        defaultValue={currentCategoria}
-        onChange={() => formRef.current?.submit()}
-        className="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring sm:w-56"
-      >
-        <option value="">Todas as categorias</option>
+    <div className="space-y-4">
+      {/* Search row */}
+      <form ref={formRef} method="GET" action="/" className="flex gap-2">
+        <div className="relative flex-1">
+          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            name="q"
+            defaultValue={currentQ}
+            placeholder="Buscar eventos, organizadores..."
+            className="h-12 pl-10 text-sm"
+          />
+        </div>
+        {/* Hidden select for category value */}
+        <select ref={categoryRef} name="categoria" defaultValue={currentCategoria} className="hidden" />
+        <Button type="submit" size="lg" className="h-12 shrink-0 px-6">
+          Buscar
+        </Button>
+      </form>
+
+      {/* Category pills */}
+      <div className="flex gap-2 overflow-x-auto pb-0.5 scrollbar-hide">
+        <button
+          type="button"
+          onClick={() => handleCategoryClick("")}
+          className={cn(
+            "shrink-0 rounded-full border px-4 py-1.5 text-sm font-medium transition-all duration-200",
+            !currentCategoria
+              ? "border-primary bg-primary text-primary-foreground"
+              : "border-border bg-card text-muted-foreground hover:border-primary/40 hover:text-foreground"
+          )}
+        >
+          Todos
+        </button>
         {EVENT_CATEGORIES.map((cat) => (
-          <option key={cat} value={cat}>
+          <button
+            key={cat}
+            type="button"
+            onClick={() => handleCategoryClick(cat)}
+            className={cn(
+              "shrink-0 rounded-full border px-4 py-1.5 text-sm font-medium transition-all duration-200",
+              currentCategoria === cat
+                ? "border-primary bg-primary text-primary-foreground"
+                : "border-border bg-card text-muted-foreground hover:border-primary/40 hover:text-foreground"
+            )}
+          >
             {cat}
-          </option>
+          </button>
         ))}
-      </select>
-      <Button type="submit" className="shrink-0">
-        Buscar
-      </Button>
-    </form>
+      </div>
+    </div>
   );
 }

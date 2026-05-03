@@ -19,7 +19,7 @@ export function LogoutButton() {
       variant="ghost"
       size="sm"
       onClick={handleLogout}
-      className="text-slate-100 hover:bg-slate-800 hover:text-white"
+      className="text-muted-foreground hover:text-foreground"
     >
       Sair
     </Button>

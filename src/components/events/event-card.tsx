@@ -1,59 +1,84 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
 import { Calendar, ImageIcon, MapPin, Star } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import { RegionalEvent } from "@/types/event";
 
 interface EventCardProps {
   event: RegionalEvent;
+  featured?: boolean;
 }
 
-export function EventCard({ event }: EventCardProps) {
+export function EventCard({ event, featured = false }: EventCardProps) {
   return (
-    <Card className="overflow-hidden rounded-2xl border-slate-200/70 shadow-lg transition-transform duration-200 hover:-translate-y-1 hover:shadow-xl">
-      <div className="relative h-52 w-full bg-slate-100">
+    <Link
+      href={`/eventos/${event.slug}`}
+      className="group block overflow-hidden rounded-2xl border border-border/60 bg-card transition-all duration-300 hover:-translate-y-0.5 hover:border-border hover:shadow-[var(--shadow-card-hover)]"
+      style={{ boxShadow: "var(--shadow-card)" }}
+    >
+      {/* Image */}
+      <div className={cn("relative w-full bg-muted", featured ? "h-64 md:h-72" : "h-48")}>
         {event.imageUrl ? (
-          <>
-            <Image src={event.imageUrl} alt={event.title} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" className="object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent" />
-          </>
+          <Image
+            src={event.imageUrl}
+            alt={event.title}
+            fill
+            sizes={
+              featured
+                ? "(max-width: 768px) 100vw, 66vw"
+                : "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            }
+            className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+          />
         ) : (
           <div className="flex h-full items-center justify-center">
-            <ImageIcon className="h-12 w-12 text-slate-300" />
+            <ImageIcon className="h-10 w-10 text-muted-foreground/30" />
           </div>
         )}
-      </div>
-      <CardHeader className="space-y-3">
-        <div className="flex items-center justify-between gap-2">
-          <Badge variant="secondary">{event.category}</Badge>
-          <span className="flex items-center gap-1 text-xs text-muted-foreground">
-            <Star className="h-4 w-4 text-yellow-500" />
-            {event.averageRating > 0 ? event.averageRating.toFixed(1) : "Sem nota"}
+
+        {/* Badges overlaid on image */}
+        <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between">
+          <span className="rounded-full bg-white/95 px-3 py-1 text-xs font-medium text-foreground shadow-sm backdrop-blur-sm">
+            {event.category}
           </span>
+          {event.averageRating > 0 && (
+            <span className="flex items-center gap-1 rounded-full bg-foreground/80 px-2.5 py-1 text-xs font-medium text-background backdrop-blur-sm">
+              <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+              {event.averageRating.toFixed(1)}
+            </span>
+          )}
         </div>
-        <CardTitle className="line-clamp-2">{event.title}</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-2 text-sm text-muted-foreground">
-        <p className="line-clamp-2">{event.description}</p>
-        <p className="flex items-center gap-1">
-          <Calendar className="h-4 w-4" />
-          {format(new Date(event.date), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })} às {event.startTime}
-        </p>
-        <p className="flex items-center gap-1">
-          <MapPin className="h-4 w-4" />
-          {event.location.cidade} - {event.location.estado}
-        </p>
-      </CardContent>
-      <CardFooter>
-        <Link href={`/eventos/${event.slug}`} className="text-sm font-medium text-primary hover:underline">
-          Ver detalhes
-        </Link>
-      </CardFooter>
-    </Card>
+      </div>
+
+      {/* Content */}
+      <div className="p-4">
+        <h3
+          className={cn(
+            "line-clamp-2 font-semibold tracking-tight text-foreground transition-colors group-hover:text-primary",
+            featured ? "text-lg" : "text-base"
+          )}
+        >
+          {event.title}
+        </h3>
+
+        <div className="mt-3 space-y-1.5 text-xs text-muted-foreground">
+          <div className="flex items-center gap-1.5">
+            <Calendar className="h-3.5 w-3.5 shrink-0" />
+            <span>
+              {format(new Date(event.date), "dd 'de' MMMM", { locale: ptBR })} às{" "}
+              {event.startTime}
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <MapPin className="h-3.5 w-3.5 shrink-0" />
+            <span>
+              {event.location.cidade}, {event.location.estado}
+            </span>
+          </div>
+        </div>
+      </div>
+    </Link>
   );
 }
