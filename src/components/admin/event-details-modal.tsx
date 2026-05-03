@@ -26,20 +26,29 @@ function formatPreco(preco: number | null) {
   return `R$ ${preco.toFixed(2).replace(".", ",")}`;
 }
 
+function Field({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
+      <p className="mt-0.5 text-sm text-foreground">{value}</p>
+    </div>
+  );
+}
+
 export function EventDetailsModal({ event }: { event: AdminEvent }) {
   return (
     <Dialog>
       <DialogTrigger render={<Button size="sm" variant="outline" />}>
-        <Eye className="mr-1 h-4 w-4" />
+        <Eye className="mr-1.5 h-3.5 w-3.5" />
         Ver detalhes
       </DialogTrigger>
       <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{event.title}</DialogTitle>
+          <DialogTitle className="pr-6 text-base">{event.title}</DialogTitle>
         </DialogHeader>
 
         {event.cover_image_url && (
-          <div className="relative h-48 w-full overflow-hidden rounded-lg">
+          <div className="relative h-44 w-full overflow-hidden rounded-xl">
             <Image
               src={event.cover_image_url}
               alt={event.title}
@@ -49,72 +58,56 @@ export function EventDetailsModal({ event }: { event: AdminEvent }) {
           </div>
         )}
 
-        <div className="space-y-3 text-sm">
-          <div className="flex flex-wrap gap-2">
-            <Badge variant="outline">{event.category}</Badge>
-            <Badge variant="outline">{event.age_rating ?? "Livre"}</Badge>
+        <div className="space-y-4">
+          {/* Badges */}
+          <div className="flex flex-wrap gap-1.5">
+            <Badge variant="outline" className="text-xs">{event.category}</Badge>
+            <Badge variant="outline" className="text-xs">{event.age_rating ?? "Livre"}</Badge>
             {event.outdoor_indoor && (
-              <Badge variant="secondary" className="capitalize">{event.outdoor_indoor}</Badge>
+              <Badge variant="secondary" className="capitalize text-xs">
+                {event.outdoor_indoor}
+              </Badge>
             )}
           </div>
 
-          <div>
-            <p className="font-medium text-muted-foreground">Organizador</p>
-            <p>{event.organizerName}</p>
+          {/* Fields grid */}
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Organizador" value={event.organizerName} />
+            <Field
+              label="Data e horário"
+              value={`${formatDate(event.event_date)} às ${event.start_time}`}
+            />
+            {event.local_nome && (
+              <Field label="Local" value={event.local_nome} />
+            )}
+            <Field
+              label="Endereço"
+              value={[event.address, event.city, event.state].filter(Boolean).join(", ")}
+            />
+            {event.vinculo && <Field label="Vínculo" value={event.vinculo} />}
+            <Field label="Ingresso" value={formatPreco(event.preco)} />
+            {event.modalidade_esportiva && (
+              <Field
+                label="Modalidade esportiva"
+                value={
+                  event.nivel_competitivo
+                    ? `${event.modalidade_esportiva} — ${event.nivel_competitivo}`
+                    : event.modalidade_esportiva
+                }
+              />
+            )}
           </div>
 
-          <div>
-            <p className="font-medium text-muted-foreground">Data e horário</p>
-            <p>
-              {formatDate(event.event_date)} às {event.start_time}
-            </p>
-          </div>
-
-          {event.local_nome && (
-            <div>
-              <p className="font-medium text-muted-foreground">Local</p>
-              <p>{event.local_nome}</p>
-            </div>
-          )}
-
-          <div>
-            <p className="font-medium text-muted-foreground">Endereço</p>
-            <p>
-              {event.address}
-              {event.address && ", "}
-              {event.city} — {event.state}
-            </p>
-          </div>
-
-          {event.vinculo && (
-            <div>
-              <p className="font-medium text-muted-foreground">Vínculo</p>
-              <p>{event.vinculo}</p>
-            </div>
-          )}
-
-          <div>
-            <p className="font-medium text-muted-foreground">Ingresso</p>
-            <p>{formatPreco(event.preco)}</p>
-          </div>
-
-          {event.modalidade_esportiva && (
-            <div>
-              <p className="font-medium text-muted-foreground">Modalidade esportiva</p>
-              <p>
-                {event.modalidade_esportiva}
-                {event.nivel_competitivo && ` — ${event.nivel_competitivo}`}
-              </p>
-            </div>
-          )}
-
+          {/* Services */}
           {event.servicos && event.servicos.length > 0 && (
             <div>
-              <p className="font-medium text-muted-foreground">Serviços disponíveis</p>
-              <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1">
+              <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Serviços
+              </p>
+              <div className="flex flex-wrap gap-x-4 gap-y-1.5">
                 {event.servicos.map((s) => (
-                  <span key={s} className="flex items-center gap-1 text-xs">
-                    <Check className="h-3 w-3 text-emerald-600" />
+                  <span key={s} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <Check className="h-3 w-3 text-emerald-500" />
                     {s}
                   </span>
                 ))}
@@ -122,9 +115,14 @@ export function EventDetailsModal({ event }: { event: AdminEvent }) {
             </div>
           )}
 
+          {/* Description */}
           <div>
-            <p className="font-medium text-muted-foreground">Descrição</p>
-            <p className="whitespace-pre-wrap">{event.description}</p>
+            <p className="mb-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Descrição
+            </p>
+            <p className="whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
+              {event.description}
+            </p>
           </div>
         </div>
       </DialogContent>

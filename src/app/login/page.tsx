@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { CalendarDays } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -39,14 +39,28 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="container mx-auto max-w-md px-4 py-16">
-      <Card>
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Bem-vindo de volta</CardTitle>
-          <CardDescription>Entre com seu e-mail e senha</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
+    <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-16">
+      <div className="w-full max-w-sm animate-fade-up">
+        {/* Logo mark */}
+        <div className="mb-8 flex justify-center">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary">
+            <CalendarDays className="h-6 w-6 text-primary-foreground" />
+          </div>
+        </div>
+
+        {/* Heading */}
+        <div className="mb-8 text-center">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+            Bem-vindo de volta
+          </h1>
+          <p className="mt-1.5 text-sm text-muted-foreground">
+            Entre com seu e-mail e senha para continuar
+          </p>
+        </div>
+
+        {/* Form */}
+        <div className="space-y-4">
+          <div className="space-y-1.5">
             <Label htmlFor="email">E-mail</Label>
             <Input
               id="email"
@@ -55,9 +69,11 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSignIn()}
+              className="h-11"
             />
           </div>
-          <div className="space-y-2">
+
+          <div className="space-y-1.5">
             <Label htmlFor="password">Senha</Label>
             <Input
               id="password"
@@ -66,23 +82,35 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSignIn()}
+              className="h-11"
             />
           </div>
 
-          <Button type="button" className="w-full" onClick={handleSignIn} disabled={loading}>
+          <Button
+            type="button"
+            className="h-11 w-full"
+            onClick={handleSignIn}
+            disabled={loading}
+          >
             {loading ? "Entrando..." : "Entrar"}
           </Button>
 
-          {message ? <p className="text-center text-sm text-destructive">{message}</p> : null}
+          {message && (
+            <p className="text-center text-sm text-destructive">{message}</p>
+          )}
+        </div>
 
-          <p className="text-center text-sm text-muted-foreground">
-            Ainda não tem conta?{" "}
-            <Link href="/cadastro" className="font-medium text-primary hover:underline">
-              Cadastre-se
-            </Link>
-          </p>
-        </CardContent>
-      </Card>
+        {/* Footer */}
+        <p className="mt-8 text-center text-sm text-muted-foreground">
+          Ainda não tem conta?{" "}
+          <Link
+            href="/cadastro"
+            className="font-medium text-primary transition-colors hover:text-primary/80"
+          >
+            Cadastre-se grátis
+          </Link>
+        </p>
+      </div>
     </div>
   );
 }
