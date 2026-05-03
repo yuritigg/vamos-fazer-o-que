@@ -49,7 +49,7 @@ export function EventSearchFilters({ currentQ, currentCategoria }: EventSearchFi
             className="h-12 pl-10 text-sm"
           />
         </div>
-        <Button type="submit" size="lg" className="h-12 shrink-0 px-6">
+        <Button type="submit" size="lg" className="h-12 shrink-0 px-6 active:scale-[0.97]">
           Buscar
         </Button>
       </form>
@@ -60,7 +60,7 @@ export function EventSearchFilters({ currentQ, currentCategoria }: EventSearchFi
           type="button"
           onClick={() => navigate(q, "")}
           className={cn(
-            "shrink-0 rounded-full border px-4 py-1.5 text-sm font-medium transition-all duration-200",
+            "shrink-0 rounded-full border px-4 py-1.5 text-sm font-medium transition-[transform,background-color,border-color,color] duration-200 active:scale-[0.97]",
             !currentCategoria
               ? "border-primary bg-primary text-primary-foreground"
               : "border-border bg-card text-muted-foreground hover:border-primary/40 hover:text-foreground"
@@ -74,7 +74,7 @@ export function EventSearchFilters({ currentQ, currentCategoria }: EventSearchFi
             type="button"
             onClick={() => navigate(q, cat)}
             className={cn(
-              "shrink-0 rounded-full border px-4 py-1.5 text-sm font-medium transition-all duration-200",
+              "shrink-0 rounded-full border px-4 py-1.5 text-sm font-medium transition-[transform,background-color,border-color,color] duration-200 active:scale-[0.97]",
               currentCategoria === cat
                 ? "border-primary bg-primary text-primary-foreground"
                 : "border-border bg-card text-muted-foreground hover:border-primary/40 hover:text-foreground"

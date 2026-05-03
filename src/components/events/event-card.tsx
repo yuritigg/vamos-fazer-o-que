@@ -15,8 +15,7 @@ export function EventCard({ event, featured = false }: EventCardProps) {
   return (
     <Link
       href={`/eventos/${event.slug}`}
-      className="group block overflow-hidden rounded-2xl border border-border/60 bg-card transition-all duration-300 hover:-translate-y-0.5 hover:border-border hover:shadow-[var(--shadow-card-hover)]"
-      style={{ boxShadow: "var(--shadow-card)" }}
+      className="card-lift group block overflow-hidden rounded-2xl border border-border/60 bg-card"
     >
       {/* Image */}
       <div className={cn("relative w-full bg-muted", featured ? "h-64 md:h-72" : "h-48")}>
@@ -30,7 +29,7 @@ export function EventCard({ event, featured = false }: EventCardProps) {
                 ? "(max-width: 768px) 100vw, 66vw"
                 : "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             }
-            className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+            className="card-image object-cover"
           />
         ) : (
           <div className="flex h-full items-center justify-center">

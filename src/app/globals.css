@@ -3,6 +3,69 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Keyframes ──────────────────────────────────────────────────────────── */
+
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Component styles ────────────────────────────────────────────────────── */
+
+@layer components {
+  /* Card grid — staggered entrance using nth-child delays (55ms apart) */
+  .event-card-grid > * {
+    animation: card-in 320ms var(--ease-out-expo) both;
+  }
+  .event-card-grid > *:nth-child(1) { animation-delay: 0ms; }
+  .event-card-grid > *:nth-child(2) { animation-delay: 55ms; }
+  .event-card-grid > *:nth-child(3) { animation-delay: 110ms; }
+  .event-card-grid > *:nth-child(4) { animation-delay: 165ms; }
+  .event-card-grid > *:nth-child(5) { animation-delay: 220ms; }
+  .event-card-grid > *:nth-child(6) { animation-delay: 275ms; }
+  .event-card-grid > *:nth-child(n+7) { animation-delay: 275ms; }
+
+  /* Card lift — precise transition (never use transition:all) */
+  .card-lift {
+    box-shadow: var(--shadow-card);
+    transition:
+      transform 200ms var(--ease-out-expo),
+      box-shadow 200ms var(--ease-out-expo),
+      border-color 150ms ease;
+  }
+
+  /* Hover gated behind pointer media query — avoids false positives on touch */
+  @media (hover: hover) and (pointer: fine) {
+    .card-lift:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-card-hover);
+    }
+
+    .card-lift:hover .card-image {
+      transform: scale(1.04);
+    }
+  }
+
+  /* Active press feedback — 100ms, instant feel */
+  .card-lift:active {
+    transform: scale(0.97);
+    transition-duration: 100ms;
+  }
+
+  /* Image zoom — decoupled transition from parent lift */
+  .card-image {
+    transition: transform 280ms var(--ease-out-expo);
+  }
+}
+
+/* ── Utilities ────────────────────────────────────────────────────────────── */
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;
@@ -14,7 +77,13 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+  /* Hero entrance — reuses fade-up keyframes, 400ms is fine for first-load marketing text */
+  .animate-hero-in {
+    animation: fade-up 400ms var(--ease-out-expo) both;
+  }
 }
+
+/* ── Base tokens ──────────────────────────────────────────────────────────── */
 
 @layer base {
   :root {
@@ -28,7 +97,6 @@
     --popover: 0 0% 100%;
     --popover-foreground: 220 22% 13%;
 
-    /* Warm amber — not the generic blue SaaS primary */
     --primary: 32 78% 48%;
     --primary-foreground: 42 25% 97%;
 
@@ -49,9 +117,12 @@
     --ring: 32 78% 48%;
     --radius: 0.75rem;
 
-    /* Elevation tokens */
+    /* Elevation */
     --shadow-card: 0 1px 3px 0 hsl(220 22% 13% / 0.06), 0 1px 2px -1px hsl(220 22% 13% / 0.04);
-    --shadow-card-hover: 0 4px 12px 0 hsl(220 22% 13% / 0.08), 0 2px 4px -2px hsl(220 22% 13% / 0.06);
+    --shadow-card-hover: 0 8px 20px 0 hsl(220 22% 13% / 0.1), 0 2px 6px -2px hsl(220 22% 13% / 0.06);
+
+    /* Custom easing — stronger than built-in ease-out */
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .dark {
@@ -90,10 +161,29 @@
   body {
     @apply bg-background text-foreground;
   }
+}
 
-  /* Smooth transitions for interactive elements */
-  a,
-  button {
-    @apply transition-colors;
+/* ── Reduced motion — keep opacity transitions, remove movement ───────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .event-card-grid > * {
+    animation: none;
+  }
+  .card-lift {
+    transition: box-shadow 150ms ease, border-color 150ms ease;
+  }
+  .card-lift:hover,
+  .card-lift:active {
+    transform: none;
+  }
+  .card-image {
+    transition: none;
+  }
+  .animate-hero-in,
+  .animate-fade-up,
+  .animate-fade-in {
+    animation: none;
+    opacity: 1;
+    transform: none;
   }
 }

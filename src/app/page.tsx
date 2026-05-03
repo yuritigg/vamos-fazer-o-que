@@ -58,30 +58,48 @@ export default async function Home({ searchParams }: HomePageProps) {
 
   return (
     <div>
-      {/* Hero */}
-      <section className="border-b border-border/50 px-4 pb-14 pt-16 md:pt-24">
+      {/* Hero — padding reduzido para aproveitar melhor o espaço */}
+      <section className="border-b border-border/50 px-4 pb-8 pt-10 md:pt-14">
         <div className="container mx-auto">
-          <div className="max-w-2xl animate-fade-up">
-            <p className="mb-5 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-primary">
+          <div className="max-w-2xl">
+            {/* Eyebrow — entra primeiro */}
+            <p
+              className="animate-hero-in mb-4 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-primary"
+              style={{ animationDelay: "0ms" }}
+            >
               <CalendarCheck className="h-3.5 w-3.5" />
               Portal de eventos regionais
             </p>
-            <h1 className="text-balance text-5xl font-bold leading-[1.1] tracking-tight text-foreground md:text-6xl">
+
+            {/* H1 — entra depois com 80ms de delay */}
+            <h1
+              className="animate-hero-in text-balance text-5xl font-bold leading-[1.1] tracking-tight text-foreground md:text-6xl"
+              style={{ animationDelay: "80ms" }}
+            >
               Descubra o que está acontecendo perto de você
             </h1>
-            <p className="mt-5 max-w-[52ch] text-lg leading-relaxed text-muted-foreground">
+
+            {/* Subtítulo — 160ms */}
+            <p
+              className="animate-hero-in mt-4 max-w-[52ch] text-lg leading-relaxed text-muted-foreground"
+              style={{ animationDelay: "160ms" }}
+            >
               Shows, feiras, esportes, teatro e muito mais. Conectamos você às melhores experiências da sua região.
             </p>
           </div>
 
-          <div className="mt-10 animate-fade-up [animation-delay:80ms]">
+          {/* Search — último a entrar, 240ms */}
+          <div
+            className="animate-hero-in mt-8"
+            style={{ animationDelay: "240ms" }}
+          >
             <EventSearchFilters currentQ={q} currentCategoria={categoria} />
           </div>
         </div>
       </section>
 
       {/* Events */}
-      <section className="container mx-auto px-4 py-12">
+      <section className="container mx-auto px-4 py-10">
         <ErrorMessage code={searchParams?.erro} />
 
         {searchParams?.sucesso === "evento-enviado" && (
@@ -107,10 +125,7 @@ export default async function Home({ searchParams }: HomePageProps) {
           {!isFiltered && (
             <Link
               href="/cadastro-evento"
-              className={cn(
-                buttonVariants({ variant: "outline", size: "sm" }),
-                "hidden md:flex"
-              )}
+              className={cn(buttonVariants({ variant: "outline", size: "sm" }), "hidden md:flex")}
             >
               Publicar evento
               <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
@@ -120,7 +135,6 @@ export default async function Home({ searchParams }: HomePageProps) {
 
         <EventList events={events} />
 
-        {/* CTA bottom — shown when no filters active */}
         {!isFiltered && events.length > 0 && (
           <div className="mt-16 rounded-2xl border border-border/60 bg-muted/30 px-8 py-10 text-center">
             <h3 className="text-lg font-semibold tracking-tight text-foreground">
