@@ -1,3 +1,4 @@
+import { Inbox } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ModerationActions } from "@/components/admin/moderation-actions";
 import { EventDetailsModal } from "@/components/admin/event-details-modal";
@@ -110,7 +111,9 @@ export async function ApprovalTable() {
   if (events.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center rounded-2xl border border-border/60 py-24 text-center">
-        <div className="mb-4 text-4xl">📭</div>
+        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-muted">
+          <Inbox className="h-7 w-7 text-muted-foreground/50" />
+        </div>
         <p className="text-base font-medium text-foreground">Nenhum evento cadastrado</p>
         <p className="mt-1 text-sm text-muted-foreground">
           Quando organizadores enviarem eventos, eles aparecerão aqui.

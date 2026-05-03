@@ -67,7 +67,7 @@ export default async function Home({ searchParams }: HomePageProps) {
               Portal de eventos regionais
             </p>
             <h1 className="text-balance text-5xl font-bold leading-[1.1] tracking-tight text-foreground md:text-6xl">
-              Descubra o que rola perto de você
+              Descubra o que está acontecendo perto de você
             </h1>
             <p className="mt-5 max-w-[52ch] text-lg leading-relaxed text-muted-foreground">
               Shows, feiras, esportes, teatro e muito mais. Conectamos você às melhores experiências da sua região.
